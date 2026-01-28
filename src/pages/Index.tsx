@@ -1,7 +1,6 @@
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import HowItWorks from "@/components/HowItWorks";
-import SavingsCalculator from "@/components/SavingsCalculator";
 import LogPayment from "@/components/LogPayment";
 import Footer from "@/components/Footer";
 
@@ -12,7 +11,6 @@ const Index = () => {
       <main className="pt-16">
         <Hero />
         <HowItWorks />
-        <SavingsCalculator />
         <LogPayment />
       </main>
       <Footer />

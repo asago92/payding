@@ -17,10 +17,10 @@ const Header = () => {
           {/* Navigation */}
           <nav className="hidden md:flex items-center gap-8">
             <a
-              href="#calculator"
+              href="#how-it-works"
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
-              Calculator
+              How It Works
             </a>
             <a
               href="#log-payment"
