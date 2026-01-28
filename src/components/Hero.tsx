@@ -2,10 +2,6 @@ import { Button } from "@/components/ui/button";
 import { ArrowDown, TrendingUp, Bell, DollarSign } from "lucide-react";
 
 const Hero = () => {
-  const scrollToCalculator = () => {
-    document.getElementById("calculator")?.scrollIntoView({ behavior: "smooth" });
-  };
-
   return (
     <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
       {/* Background decoration */}
@@ -40,12 +36,9 @@ const Hero = () => {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 animate-slide-up" style={{ animationDelay: "0.3s" }}>
-            <Button variant="hero" size="xl" onClick={scrollToCalculator}>
+            <Button variant="hero" size="xl" onClick={() => document.getElementById("log-payment")?.scrollIntoView({ behavior: "smooth" })}>
               <TrendingUp className="w-5 h-5" />
-              Calculate Your Savings
-            </Button>
-            <Button variant="outline" size="lg" onClick={() => document.getElementById("log-payment")?.scrollIntoView({ behavior: "smooth" })}>
-              Log a Payment
+              Get Started
             </Button>
           </div>
 
@@ -61,7 +54,7 @@ const Hero = () => {
             </div>
             <div className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-primary" />
-              <span className="text-sm">Real-time rate tracking</span>
+              <span className="text-sm">Free to use</span>
             </div>
           </div>
         </div>
