@@ -1,4 +1,4 @@
-import { TrendingUp } from "lucide-react";
+import { DollarSign } from "lucide-react";
 
 const Footer = () => {
   return (
@@ -8,9 +8,9 @@ const Footer = () => {
           {/* Logo */}
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg gradient-hero flex items-center justify-center">
-              <TrendingUp className="w-4 h-4 text-primary-foreground" />
+              <DollarSign className="w-4 h-4 text-primary-foreground" />
             </div>
-            <span className="font-semibold">RateWatch</span>
+            <span className="font-semibold">Payding</span>
           </div>
 
           {/* Info */}
@@ -20,7 +20,7 @@ const Footer = () => {
 
           {/* Copyright */}
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} RateWatch
+            © {new Date().getFullYear()} Payding
           </p>
         </div>
       </div>

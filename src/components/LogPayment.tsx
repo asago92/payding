@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Check, Bell, TrendingUp, Plus, Mail, Smartphone } from "lucide-react";
+import { Check, Bell, TrendingUp, Plus, Mail, Smartphone, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const currencies = [
   { code: "NGN", name: "Nigerian Naira", symbol: "₦" },
@@ -18,17 +19,6 @@ const currencies = [
   { code: "MXN", name: "Mexican Peso", symbol: "$" },
 ];
 
-interface LoggedPayment {
-  id: string;
-  amount: number;
-  paymentCurrency: string;
-  dateReceived: string;
-  localCurrency: string;
-  notificationType: string;
-  notificationMethod: string;
-  threshold: number;
-}
-
 const paymentCurrencies = [
   { code: "USD", name: "US Dollar", symbol: "$" },
   { code: "EUR", name: "Euro", symbol: "€" },
@@ -37,48 +27,151 @@ const paymentCurrencies = [
   { code: "AUD", name: "Australian Dollar", symbol: "A$" },
 ];
 
+const paymentSources = [
+  { id: "paypal", name: "PayPal" },
+  { id: "wise", name: "Wise" },
+  { id: "upwork", name: "Upwork" },
+  { id: "fiverr", name: "Fiverr" },
+  { id: "stripe", name: "Stripe" },
+  { id: "bank", name: "Bank Transfer" },
+  { id: "other", name: "Other" },
+];
+
+interface Payment {
+  id: string;
+  amount: number;
+  payment_currency: string;
+  date_received: string;
+  local_currency: string;
+  payment_source: string;
+  notification_type: string;
+  notification_method: string;
+  threshold: number;
+  is_active: boolean;
+}
+
 const LogPayment = () => {
   const [amount, setAmount] = useState<string>("");
   const [paymentCurrency, setPaymentCurrency] = useState<string>("USD");
   const [dateReceived, setDateReceived] = useState<string>("");
   const [localCurrency, setLocalCurrency] = useState<string>("");
+  const [paymentSource, setPaymentSource] = useState<string>("");
   const [notificationType, setNotificationType] = useState<string>("daily");
   const [notificationMethod, setNotificationMethod] = useState<string>("email");
   const [threshold, setThreshold] = useState<string>("2");
-  const [payments, setPayments] = useState<LoggedPayment[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
+  const [user, setUser] = useState<any>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    // Check for user session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchPayments(session.user.id);
+      } else {
+        setIsFetching(false);
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchPayments(session.user.id);
+      } else {
+        setPayments([]);
+        setIsFetching(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const fetchPayments = async (userId: string) => {
+    setIsFetching(true);
+    const { data, error } = await supabase
+      .from('payments')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('is_active', true)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching payments:', error);
+      toast.error('Failed to load payments');
+    } else {
+      setPayments(data || []);
+    }
+    setIsFetching(false);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!amount || !dateReceived || !localCurrency) {
+    if (!user) {
+      toast.error("Please sign in to log payments");
+      return;
+    }
+
+    if (!amount || !dateReceived || !localCurrency || !paymentSource) {
       toast.error("Please fill in all required fields");
       return;
     }
 
-    const newPayment: LoggedPayment = {
-      id: Date.now().toString(),
-      amount: parseFloat(amount),
-      paymentCurrency,
-      dateReceived,
-      localCurrency,
-      notificationType,
-      notificationMethod,
-      threshold: notificationType === "threshold" ? parseFloat(threshold) : 0,
-    };
+    setIsLoading(true);
 
-    setPayments([newPayment, ...payments]);
-    toast.success(`Payment logged! We'll send ${notificationMethod === "email" ? "email" : "push"} alerts when rates are favorable.`, {
-      icon: <Bell className="w-4 h-4" />,
-    });
+    const { error } = await supabase
+      .from('payments')
+      .insert({
+        user_id: user.id,
+        amount: parseFloat(amount),
+        payment_currency: paymentCurrency,
+        date_received: dateReceived,
+        local_currency: localCurrency,
+        payment_source: paymentSource,
+        notification_type: notificationType,
+        notification_method: notificationMethod,
+        threshold: notificationType === "threshold" ? parseFloat(threshold) : 0,
+      });
 
-    // Reset form
-    setAmount("");
-    setPaymentCurrency("USD");
-    setDateReceived("");
-    setLocalCurrency("");
-    setNotificationType("daily");
-    setNotificationMethod("email");
-    setThreshold("2");
+    if (error) {
+      console.error('Error saving payment:', error);
+      toast.error("Failed to log payment");
+    } else {
+      toast.success(`Payment logged! We'll send ${notificationMethod === "email" ? "email" : "push"} alerts when rates are favorable.`, {
+        icon: <Bell className="w-4 h-4" />,
+      });
+      
+      // Refresh payments list
+      fetchPayments(user.id);
+
+      // Reset form
+      setAmount("");
+      setPaymentCurrency("USD");
+      setDateReceived("");
+      setLocalCurrency("");
+      setPaymentSource("");
+      setNotificationType("daily");
+      setNotificationMethod("email");
+      setThreshold("2");
+    }
+
+    setIsLoading(false);
+  };
+
+  const handleDeletePayment = async (paymentId: string) => {
+    const { error } = await supabase
+      .from('payments')
+      .update({ is_active: false })
+      .eq('id', paymentId);
+
+    if (error) {
+      toast.error("Failed to remove payment");
+    } else {
+      toast.success("Payment alert removed");
+      setPayments(payments.filter(p => p.id !== paymentId));
+    }
   };
 
   const getPaymentCurrencySymbol = (code: string) => {
@@ -87,6 +180,10 @@ const LogPayment = () => {
 
   const getCurrencySymbol = (code: string) => {
     return currencies.find((c) => c.code === code)?.symbol || "";
+  };
+
+  const getSourceName = (id: string) => {
+    return paymentSources.find((s) => s.id === id)?.name || id;
   };
 
   return (
@@ -141,6 +238,25 @@ const LogPayment = () => {
                         />
                       </div>
                     </div>
+                  </div>
+
+                  {/* Payment Source */}
+                  <div className="space-y-2">
+                    <Label htmlFor="payment-source" className="text-sm font-medium">
+                      Payment Source *
+                    </Label>
+                    <Select value={paymentSource} onValueChange={setPaymentSource}>
+                      <SelectTrigger className="h-12">
+                        <SelectValue placeholder="Where did you receive this payment?" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {paymentSources.map((source) => (
+                          <SelectItem key={source.id} value={source.id}>
+                            {source.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   {/* Date Received */}
@@ -263,8 +379,24 @@ const LogPayment = () => {
                     </RadioGroup>
                   </div>
 
-                  <Button variant="hero" size="lg" className="w-full" type="submit">
-                    <Plus className="w-5 h-5" />
+                  {!user && (
+                    <p className="text-sm text-muted-foreground text-center py-2">
+                      Please sign in to log and track your payments
+                    </p>
+                  )}
+
+                  <Button 
+                    variant="hero" 
+                    size="lg" 
+                    className="w-full" 
+                    type="submit"
+                    disabled={isLoading || !user}
+                  >
+                    {isLoading ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <Plus className="w-5 h-5" />
+                    )}
                     Log Payment & Set Alert
                   </Button>
                 </div>
@@ -279,7 +411,16 @@ const LogPayment = () => {
                   Active Alerts
                 </h3>
 
-                {payments.length === 0 ? (
+                {isFetching ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                  </div>
+                ) : !user ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <Bell className="w-12 h-12 mx-auto mb-4 opacity-30" />
+                    <p className="text-sm">Sign in to view your alerts.</p>
+                  </div>
+                ) : payments.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <Bell className="w-12 h-12 mx-auto mb-4 opacity-30" />
                     <p className="text-sm">No payments logged yet.</p>
@@ -294,21 +435,31 @@ const LogPayment = () => {
                       >
                         <div className="flex items-start justify-between mb-2">
                           <span className="text-xl font-bold">
-                            {getPaymentCurrencySymbol(payment.paymentCurrency)}{payment.amount.toLocaleString()}
+                            {getPaymentCurrencySymbol(payment.payment_currency)}{Number(payment.amount).toLocaleString()}
                           </span>
-                          <div className="flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-primary/10 text-primary">
-                            <Check className="w-3 h-3" />
-                            Tracking
+                          <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-primary/10 text-primary">
+                              <Check className="w-3 h-3" />
+                              Tracking
+                            </div>
+                            <button
+                              onClick={() => handleDeletePayment(payment.id)}
+                              className="p-1 hover:bg-destructive/10 rounded-full transition-colors"
+                              title="Remove alert"
+                            >
+                              <Trash2 className="w-4 h-4 text-muted-foreground hover:text-destructive" />
+                            </button>
                           </div>
                         </div>
                         <div className="text-sm text-muted-foreground space-y-1">
                           <p>
-                            {payment.paymentCurrency} → {getCurrencySymbol(payment.localCurrency)} {payment.localCurrency}
+                            {payment.payment_currency} → {getCurrencySymbol(payment.local_currency)} {payment.local_currency}
                           </p>
-                          <p>Received: {new Date(payment.dateReceived).toLocaleDateString()}</p>
+                          <p>Source: {getSourceName(payment.payment_source)}</p>
+                          <p>Received: {new Date(payment.date_received).toLocaleDateString()}</p>
                           <p className="text-xs flex items-center gap-1">
-                            {payment.notificationMethod === "email" ? <Mail className="w-3 h-3" /> : <Smartphone className="w-3 h-3" />}
-                            {payment.notificationType === "daily"
+                            {payment.notification_method === "email" ? <Mail className="w-3 h-3" /> : <Smartphone className="w-3 h-3" />}
+                            {payment.notification_type === "daily"
                               ? "Daily alerts"
                               : `Alert at +${payment.threshold}%`}
                           </p>

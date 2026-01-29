@@ -14,7 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      payments: {
+        Row: {
+          amount: number
+          created_at: string
+          date_received: string
+          id: string
+          is_active: boolean
+          local_currency: string
+          notification_method: string
+          notification_type: string
+          payment_currency: string
+          payment_source: string
+          threshold: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          date_received: string
+          id?: string
+          is_active?: boolean
+          local_currency: string
+          notification_method?: string
+          notification_type?: string
+          payment_currency: string
+          payment_source: string
+          threshold?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          date_received?: string
+          id?: string
+          is_active?: boolean
+          local_currency?: string
+          notification_method?: string
+          notification_type?: string
+          payment_currency?: string
+          payment_source?: string
+          threshold?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
