@@ -19,8 +19,11 @@ export type Database = {
           amount: number
           created_at: string
           date_received: string
+          exchange_rate_at_receipt: number | null
           id: string
           is_active: boolean
+          last_checked_rate: number | null
+          last_rate_check: string | null
           local_currency: string
           notification_method: string
           notification_type: string
@@ -34,8 +37,11 @@ export type Database = {
           amount: number
           created_at?: string
           date_received: string
+          exchange_rate_at_receipt?: number | null
           id?: string
           is_active?: boolean
+          last_checked_rate?: number | null
+          last_rate_check?: string | null
           local_currency: string
           notification_method?: string
           notification_type?: string
@@ -49,8 +55,11 @@ export type Database = {
           amount?: number
           created_at?: string
           date_received?: string
+          exchange_rate_at_receipt?: number | null
           id?: string
           is_active?: boolean
+          last_checked_rate?: number | null
+          last_rate_check?: string | null
           local_currency?: string
           notification_method?: string
           notification_type?: string

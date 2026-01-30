@@ -48,6 +48,9 @@ interface Payment {
   notification_method: string;
   threshold: number;
   is_active: boolean;
+  exchange_rate_at_receipt: number | null;
+  last_checked_rate: number | null;
+  last_rate_check: string | null;
 }
 
 const LogPayment = () => {
@@ -106,6 +109,20 @@ const LogPayment = () => {
     setIsFetching(false);
   };
 
+  const fetchExchangeRate = async (base: string, target: string, date?: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('fetch-exchange-rates', {
+        body: { action: 'get_rate', base, target, date }
+      });
+      
+      if (error) throw error;
+      return data.rate;
+    } catch (err) {
+      console.error('Error fetching exchange rate:', err);
+      return null;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -121,6 +138,10 @@ const LogPayment = () => {
 
     setIsLoading(true);
 
+    // Fetch the exchange rate for the date payment was received
+    const rateAtReceipt = await fetchExchangeRate(paymentCurrency, localCurrency, dateReceived);
+    const currentRate = await fetchExchangeRate(paymentCurrency, localCurrency);
+
     const { error } = await supabase
       .from('payments')
       .insert({
@@ -133,13 +154,16 @@ const LogPayment = () => {
         notification_type: notificationType,
         notification_method: notificationMethod,
         threshold: notificationType === "threshold" ? parseFloat(threshold) : 0,
+        exchange_rate_at_receipt: rateAtReceipt,
+        last_checked_rate: currentRate,
+        last_rate_check: new Date().toISOString(),
       });
 
     if (error) {
       console.error('Error saving payment:', error);
       toast.error("Failed to log payment");
     } else {
-      toast.success(`Payment logged! We'll send ${notificationMethod === "email" ? "email" : "push"} alerts when rates are favorable.`, {
+      toast.success(`Payment logged! We'll notify you when rates improve vs your payment date.`, {
         icon: <Bell className="w-4 h-4" />,
       });
       
@@ -385,6 +409,10 @@ const LogPayment = () => {
                     </p>
                   )}
 
+                  <p className="text-xs text-muted-foreground text-center bg-secondary/50 p-3 rounded-lg">
+                    <strong>TL;DR:</strong> We provide the data, but you make the call. We aren't responsible for market shifts or how your bank handles your money.
+                  </p>
+
                   <Button 
                     variant="hero" 
                     size="lg" 
@@ -457,11 +485,29 @@ const LogPayment = () => {
                           </p>
                           <p>Source: {getSourceName(payment.payment_source)}</p>
                           <p>Received: {new Date(payment.date_received).toLocaleDateString()}</p>
+                          {payment.exchange_rate_at_receipt && payment.last_checked_rate && (
+                            <div className="mt-2 p-2 bg-background/50 rounded-lg">
+                              <p className="text-xs">
+                                Rate at receipt: <span className="font-medium">{payment.exchange_rate_at_receipt.toFixed(4)}</span>
+                              </p>
+                              <p className="text-xs">
+                                Current rate: <span className="font-medium">{payment.last_checked_rate.toFixed(4)}</span>
+                              </p>
+                              {(() => {
+                                const change = ((payment.last_checked_rate - payment.exchange_rate_at_receipt) / payment.exchange_rate_at_receipt) * 100;
+                                return (
+                                  <p className={`text-xs font-medium ${change >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+                                    {change >= 0 ? '↑' : '↓'} {Math.abs(change).toFixed(2)}% since payment
+                                  </p>
+                                );
+                              })()}
+                            </div>
+                          )}
                           <p className="text-xs flex items-center gap-1">
                             {payment.notification_method === "email" ? <Mail className="w-3 h-3" /> : <Smartphone className="w-3 h-3" />}
                             {payment.notification_type === "daily"
-                              ? "Daily alerts"
-                              : `Alert at +${payment.threshold}%`}
+                              ? "Daily alerts (vs payment date)"
+                              : `Alert at +${payment.threshold}% vs payment date`}
                           </p>
                         </div>
                       </div>
