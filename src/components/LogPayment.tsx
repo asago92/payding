@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -54,13 +55,14 @@ interface Payment {
 }
 
 const LogPayment = () => {
+  const navigate = useNavigate();
   const [amount, setAmount] = useState<string>("");
   const [paymentCurrency, setPaymentCurrency] = useState<string>("USD");
   const [dateReceived, setDateReceived] = useState<string>("");
   const [localCurrency, setLocalCurrency] = useState<string>("");
   const [paymentSource, setPaymentSource] = useState<string>("");
   const [notificationType, setNotificationType] = useState<string>("daily");
-  const [notificationMethod, setNotificationMethod] = useState<string>("email");
+  const [notificationMethod, setNotificationMethod] = useState<string>("push");
   const [threshold, setThreshold] = useState<string>("2");
   const [payments, setPayments] = useState<Payment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -126,8 +128,26 @@ const LogPayment = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!user) {
-      toast.error("Please sign in to log payments");
+    // If email notification is selected and user not logged in, redirect to auth
+    if (notificationMethod === "email" && !user) {
+      toast.info("Please sign in to receive email notifications");
+      navigate("/auth?signup=true");
+      return;
+    }
+
+    // For push notifications, we can proceed without login (or with login)
+    if (notificationMethod === "push" && !user) {
+      toast.success("Push notification alert set! (Demo mode - no account required)", {
+        icon: <Bell className="w-4 h-4" />,
+      });
+      // Reset form for demo
+      setAmount("");
+      setPaymentCurrency("USD");
+      setDateReceived("");
+      setLocalCurrency("");
+      setPaymentSource("");
+      setNotificationType("daily");
+      setThreshold("2");
       return;
     }
 
@@ -413,14 +433,16 @@ const LogPayment = () => {
                     size="lg" 
                     className="w-full" 
                     type="submit"
-                    disabled={isLoading || !user}
+                    disabled={isLoading}
                   >
                     {isLoading ? (
                       <Loader2 className="w-5 h-5 animate-spin" />
                     ) : (
                       <Plus className="w-5 h-5" />
                     )}
-                    Log Payment & Set Alert
+                    {notificationMethod === "email" && !user 
+                      ? "Sign Up & Set Alert" 
+                      : "Log Payment & Set Alert"}
                   </Button>
                 </div>
               </form>
