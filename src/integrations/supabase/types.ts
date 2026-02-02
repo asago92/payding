@@ -30,6 +30,7 @@ export type Database = {
           payment_currency: string
           payment_source: string
           threshold: number | null
+          timezone: string | null
           updated_at: string
           user_id: string
         }
@@ -48,6 +49,7 @@ export type Database = {
           payment_currency: string
           payment_source: string
           threshold?: number | null
+          timezone?: string | null
           updated_at?: string
           user_id: string
         }
@@ -66,6 +68,7 @@ export type Database = {
           payment_currency?: string
           payment_source?: string
           threshold?: number | null
+          timezone?: string | null
           updated_at?: string
           user_id?: string
         }

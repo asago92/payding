@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { DollarSign, Loader2, Mail, Lock, ArrowLeft, Chrome } from "lucide-react";
+import { DollarSign, Loader2, Mail, Lock, ArrowLeft, Chrome, ArrowRight } from "lucide-react";
 import { lovable } from "@/integrations/lovable";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,9 +11,11 @@ import { supabase } from "@/integrations/supabase/client";
 const Auth = () => {
   const [searchParams] = useSearchParams();
   const [isLogin, setIsLogin] = useState(!searchParams.get("signup"));
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [resetEmailSent, setResetEmailSent] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -32,6 +34,28 @@ const Auth = () => {
 
     return () => subscription.unsubscribe();
   }, [navigate]);
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) {
+        toast.error(error.message);
+      } else {
+        setResetEmailSent(true);
+        toast.success("Password reset email sent! Check your inbox.");
+      }
+    } catch (error: any) {
+      toast.error("An unexpected error occurred");
+    }
+
+    setIsLoading(false);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,6 +104,103 @@ const Auth = () => {
 
     setIsLoading(false);
   };
+
+  // Forgot Password View
+  if (isForgotPassword) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-pulse-glow" />
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/20 rounded-full blur-3xl" />
+        </div>
+
+        <div className="relative z-10 w-full max-w-md">
+          <button
+            onClick={() => {
+              setIsForgotPassword(false);
+              setResetEmailSent(false);
+            }}
+            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to sign in
+          </button>
+
+          <div className="flex items-center gap-2 mb-8">
+            <div className="w-10 h-10 rounded-lg gradient-hero flex items-center justify-center">
+              <DollarSign className="w-6 h-6 text-primary-foreground" />
+            </div>
+            <span className="font-bold text-2xl">Payding</span>
+          </div>
+
+          <div className="bg-card rounded-2xl border border-border shadow-soft p-8">
+            {resetEmailSent ? (
+              <div className="text-center">
+                <Mail className="w-16 h-16 text-primary mx-auto mb-4" />
+                <h1 className="text-2xl font-bold mb-2">Check your email</h1>
+                <p className="text-muted-foreground mb-6">
+                  We've sent a password reset link to <strong>{email}</strong>
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setIsForgotPassword(false);
+                    setResetEmailSent(false);
+                    setIsLogin(true);
+                  }}
+                  className="w-full"
+                >
+                  Back to sign in
+                </Button>
+              </div>
+            ) : (
+              <>
+                <h1 className="text-2xl font-bold mb-2">Forgot password?</h1>
+                <p className="text-muted-foreground mb-6">
+                  Enter your email and we'll send you a reset link
+                </p>
+
+                <form onSubmit={handleForgotPassword} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        id="email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="pl-10 h-12"
+                        placeholder="you@example.com"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <Button
+                    variant="hero"
+                    size="lg"
+                    className="w-full"
+                    type="submit"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <>
+                        Send reset link
+                        <ArrowRight className="w-4 h-4 ml-2" />
+                      </>
+                    )}
+                  </Button>
+                </form>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -136,7 +257,18 @@ const Auth = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">Password</Label>
+                {isLogin && (
+                  <button
+                    type="button"
+                    onClick={() => setIsForgotPassword(true)}
+                    className="text-sm text-primary hover:underline"
+                  >
+                    Forgot password?
+                  </button>
+                )}
+              </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
