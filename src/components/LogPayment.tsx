@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Check, Bell, TrendingUp, Plus, Mail, Smartphone, Loader2, Trash2 } from "lucide-react";
+import { Check, Bell, TrendingUp, Plus, Mail, Smartphone, Loader2, Trash2, Globe } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -38,6 +38,26 @@ const paymentSources = [
   { id: "other", name: "Other" },
 ];
 
+const timezones = [
+  { value: "UTC", label: "UTC (Coordinated Universal Time)" },
+  { value: "America/New_York", label: "Eastern Time (US & Canada)" },
+  { value: "America/Chicago", label: "Central Time (US & Canada)" },
+  { value: "America/Denver", label: "Mountain Time (US & Canada)" },
+  { value: "America/Los_Angeles", label: "Pacific Time (US & Canada)" },
+  { value: "Europe/London", label: "London (GMT/BST)" },
+  { value: "Europe/Paris", label: "Central European Time" },
+  { value: "Europe/Berlin", label: "Berlin (CET/CEST)" },
+  { value: "Asia/Dubai", label: "Dubai (GST)" },
+  { value: "Asia/Kolkata", label: "India Standard Time" },
+  { value: "Asia/Singapore", label: "Singapore Time" },
+  { value: "Asia/Tokyo", label: "Japan Standard Time" },
+  { value: "Asia/Shanghai", label: "China Standard Time" },
+  { value: "Australia/Sydney", label: "Sydney (AEST/AEDT)" },
+  { value: "Africa/Lagos", label: "West Africa Time (Lagos)" },
+  { value: "Africa/Nairobi", label: "East Africa Time (Nairobi)" },
+  { value: "Africa/Johannesburg", label: "South Africa Standard Time" },
+];
+
 interface Payment {
   id: string;
   amount: number;
@@ -52,6 +72,7 @@ interface Payment {
   exchange_rate_at_receipt: number | null;
   last_checked_rate: number | null;
   last_rate_check: string | null;
+  timezone?: string;
 }
 
 const LogPayment = () => {
@@ -64,6 +85,14 @@ const LogPayment = () => {
   const [notificationType, setNotificationType] = useState<string>("daily");
   const [notificationMethod, setNotificationMethod] = useState<string>("push");
   const [threshold, setThreshold] = useState<string>("2");
+  const [timezone, setTimezone] = useState<string>(() => {
+    // Try to detect user's timezone
+    try {
+      return Intl.DateTimeFormat().resolvedOptions().timeZone;
+    } catch {
+      return "UTC";
+    }
+  });
   const [payments, setPayments] = useState<Payment[]>([]);
   const [guestPayments, setGuestPayments] = useState<Payment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -203,6 +232,7 @@ const LogPayment = () => {
         exchange_rate_at_receipt: rateAtReceipt,
         last_checked_rate: currentRate,
         last_rate_check: new Date().toISOString(),
+        timezone: timezone,
       };
 
       saveGuestPayment(guestPayment);
@@ -249,6 +279,7 @@ const LogPayment = () => {
         exchange_rate_at_receipt: rateAtReceipt,
         last_checked_rate: currentRate,
         last_rate_check: new Date().toISOString(),
+        timezone: timezone,
       });
 
     if (error) {
@@ -495,6 +526,28 @@ const LogPayment = () => {
                     </RadioGroup>
                   </div>
 
+                  {/* Timezone Selection */}
+                  <div className="space-y-2">
+                    <Label htmlFor="timezone" className="text-sm font-medium flex items-center gap-2">
+                      <Globe className="w-4 h-4 text-muted-foreground" />
+                      Your Timezone (for 8 AM alerts)
+                    </Label>
+                    <Select value={timezone} onValueChange={setTimezone}>
+                      <SelectTrigger className="h-12">
+                        <SelectValue placeholder="Select your timezone" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {timezones.map((tz) => (
+                          <SelectItem key={tz.value} value={tz.value}>
+                            {tz.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      Daily rate alerts will be sent at 8:00 AM in your selected timezone
+                    </p>
+                  </div>
 
                   <p className="text-xs text-muted-foreground text-center bg-secondary/50 p-3 rounded-lg">
                     <strong>TL;DR:</strong> We provide the data, but you make the call. We aren't responsible for market shifts or how your bank handles your money.

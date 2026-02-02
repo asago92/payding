@@ -59,6 +59,7 @@ Deno.serve(async (req) => {
 
     if (action === 'check_all_payments') {
       // This action is for scheduled checks - fetch all active payments and compare rates
+      // The cron job runs hourly; we check each payment's timezone to see if it's ~8 AM there
       const supabaseUrl = Deno.env.get('SUPABASE_URL')!
       const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
       const supabase = createClient(supabaseUrl, supabaseKey)
@@ -76,10 +77,39 @@ Deno.serve(async (req) => {
 
       console.log(`Found ${payments?.length || 0} active payments to check`)
 
+      // Helper to check if it's approximately 8 AM in a given timezone
+      const isEightAMInTimezone = (timezone: string): boolean => {
+        try {
+          const now = new Date()
+          const formatter = new Intl.DateTimeFormat('en-US', {
+            timeZone: timezone,
+            hour: 'numeric',
+            hour12: false,
+          })
+          const hourStr = formatter.format(now)
+          const hour = parseInt(hourStr, 10)
+          // Check if it's between 8:00-8:59 AM
+          return hour === 8
+        } catch (e) {
+          console.error(`Invalid timezone ${timezone}, defaulting to UTC`)
+          return false
+        }
+      }
+
       const results = []
 
       for (const payment of payments || []) {
         try {
+          // Check if it's 8 AM in the user's timezone
+          const userTimezone = payment.timezone || 'UTC'
+          if (!isEightAMInTimezone(userTimezone)) {
+            console.log(`Skipping payment ${payment.id}: not 8 AM in ${userTimezone}`)
+            continue
+          }
+
+          console.log(`Processing payment ${payment.id}: it's 8 AM in ${userTimezone}`)
+
+          // Get current rate
           // Get current rate
           const currentRateResponse = await fetch(
             `${FRANKFURTER_API}/latest?from=${payment.payment_currency}&to=${payment.local_currency}`
