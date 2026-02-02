@@ -635,10 +635,22 @@ const LogPayment = () => {
                                 Current rate: <span className="font-medium">{payment.last_checked_rate.toFixed(4)}</span>
                               </p>
                               {(() => {
-                                const change = ((payment.last_checked_rate - payment.exchange_rate_at_receipt) / payment.exchange_rate_at_receipt) * 100;
+                                const localAmountAtReceipt = payment.amount * payment.exchange_rate_at_receipt;
+                                const localAmountNow = payment.amount * payment.last_checked_rate;
+                                const difference = localAmountNow - localAmountAtReceipt;
+                                const formattedDiff = Math.abs(difference).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                                const dateStr = new Date(payment.date_received).toLocaleDateString();
+                                
+                                if (Math.abs(difference) < 0.01) {
+                                  return (
+                                    <p className="text-xs font-medium text-muted-foreground">
+                                      No change in {payment.local_currency} value since {dateStr}
+                                    </p>
+                                  );
+                                }
                                 return (
-                                  <p className={`text-xs font-medium ${change >= 0 ? 'text-green-600' : 'text-red-500'}`}>
-                                    {change >= 0 ? '↑' : '↓'} {Math.abs(change).toFixed(2)}% since payment
+                                  <p className={`text-xs font-medium ${difference > 0 ? 'text-green-600' : 'text-red-500'}`}>
+                                    You get {difference > 0 ? 'an extra' : 'less'} {getCurrencySymbol(payment.local_currency)}{formattedDiff} {payment.local_currency} today compared to {dateStr}
                                   </p>
                                 );
                               })()}
@@ -700,10 +712,22 @@ const LogPayment = () => {
                                 Current rate: <span className="font-medium">{payment.last_checked_rate.toFixed(4)}</span>
                               </p>
                               {(() => {
-                                const change = ((payment.last_checked_rate - payment.exchange_rate_at_receipt) / payment.exchange_rate_at_receipt) * 100;
+                                const localAmountAtReceipt = Number(payment.amount) * Number(payment.exchange_rate_at_receipt);
+                                const localAmountNow = Number(payment.amount) * Number(payment.last_checked_rate);
+                                const difference = localAmountNow - localAmountAtReceipt;
+                                const formattedDiff = Math.abs(difference).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                                const dateStr = new Date(payment.date_received).toLocaleDateString();
+                                
+                                if (Math.abs(difference) < 0.01) {
+                                  return (
+                                    <p className="text-xs font-medium text-muted-foreground">
+                                      No change in {payment.local_currency} value since {dateStr}
+                                    </p>
+                                  );
+                                }
                                 return (
-                                  <p className={`text-xs font-medium ${change >= 0 ? 'text-green-600' : 'text-red-500'}`}>
-                                    {change >= 0 ? '↑' : '↓'} {Math.abs(change).toFixed(2)}% since payment
+                                  <p className={`text-xs font-medium ${difference > 0 ? 'text-green-600' : 'text-red-500'}`}>
+                                    You get {difference > 0 ? 'an extra' : 'less'} {getCurrencySymbol(payment.local_currency)}{formattedDiff} {payment.local_currency} today compared to {dateStr}
                                   </p>
                                 );
                               })()}
