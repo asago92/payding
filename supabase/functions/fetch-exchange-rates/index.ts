@@ -5,7 +5,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// Frankfurter API - free, uses ECB mid-market rates
+// Frankfurter API - free, uses ECB (European Central Bank) reference rates
+// ECB publishes rates once daily around 16:00 CET - these are the official mid-market rates
+// Historical date queries return the ECB close rate for that specific date
 const FRANKFURTER_API = 'https://api.frankfurter.app'
 
 interface ExchangeRateResponse {
@@ -104,10 +106,12 @@ Deno.serve(async (req) => {
           const historicalData: ExchangeRateResponse = await paymentDateRateResponse.json()
           const rateAtReceipt = historicalData.rates[payment.local_currency]
 
-          // Calculate percentage change from payment date to now
+          // Calculate percentage change: ECB close rate at date received vs current ECB mid-market rate
+          // Positive = local currency strengthened (better to convert now)
+          // Negative = local currency weakened (should have converted earlier)
           const percentChange = ((currentRate - rateAtReceipt) / rateAtReceipt) * 100
 
-          console.log(`Payment ${payment.id}: rate at receipt=${rateAtReceipt}, current=${currentRate}, change=${percentChange.toFixed(2)}%`)
+          console.log(`Payment ${payment.id}: ECB close rate at receipt (${payment.date_received})=${rateAtReceipt}, current live rate=${currentRate}, change=${percentChange.toFixed(2)}%`)
 
           // Update payment with current rate info
           await supabase
