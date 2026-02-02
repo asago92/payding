@@ -71,9 +71,14 @@ const Header = () => {
               </Button>
             </div>
           ) : (
-            <Button variant="default" size="sm" onClick={() => navigate("/auth")}>
-              Get Started
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={() => navigate("/auth")}>
+                Sign In
+              </Button>
+              <Button variant="default" size="sm" onClick={() => navigate("/auth?signup=true")}>
+                Create Account
+              </Button>
+            </div>
           )}
         </div>
       </div>
