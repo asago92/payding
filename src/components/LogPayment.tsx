@@ -403,11 +403,6 @@ const LogPayment = () => {
                     </RadioGroup>
                   </div>
 
-                  {!user && (
-                    <p className="text-sm text-muted-foreground text-center py-2">
-                      Please sign in to log and track your payments
-                    </p>
-                  )}
 
                   <p className="text-xs text-muted-foreground text-center bg-secondary/50 p-3 rounded-lg">
                     <strong>TL;DR:</strong> We provide the data, but you make the call. We aren't responsible for market shifts or how your bank handles your money.
