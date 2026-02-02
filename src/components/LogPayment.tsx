@@ -65,11 +65,52 @@ const LogPayment = () => {
   const [notificationMethod, setNotificationMethod] = useState<string>("push");
   const [threshold, setThreshold] = useState<string>("2");
   const [payments, setPayments] = useState<Payment[]>([]);
+  const [guestPayments, setGuestPayments] = useState<Payment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const [user, setUser] = useState<any>(null);
 
+  const GUEST_PAYMENTS_KEY = "payding_guest_alerts";
+
+  // Load guest payments from localStorage
+  const loadGuestPayments = () => {
+    try {
+      const stored = localStorage.getItem(GUEST_PAYMENTS_KEY);
+      if (stored) {
+        setGuestPayments(JSON.parse(stored));
+      }
+    } catch (e) {
+      console.error("Error loading guest payments:", e);
+    }
+  };
+
+  const saveGuestPayment = (payment: Payment) => {
+    try {
+      const stored = localStorage.getItem(GUEST_PAYMENTS_KEY);
+      const existing: Payment[] = stored ? JSON.parse(stored) : [];
+      const updated = [payment, ...existing];
+      localStorage.setItem(GUEST_PAYMENTS_KEY, JSON.stringify(updated));
+      setGuestPayments(updated);
+    } catch (e) {
+      console.error("Error saving guest payment:", e);
+    }
+  };
+
+  const removeGuestPayment = (paymentId: string) => {
+    try {
+      const updated = guestPayments.filter(p => p.id !== paymentId);
+      localStorage.setItem(GUEST_PAYMENTS_KEY, JSON.stringify(updated));
+      setGuestPayments(updated);
+      toast.success("Alert removed");
+    } catch (e) {
+      console.error("Error removing guest payment:", e);
+    }
+  };
+
   useEffect(() => {
+    // Load guest payments on mount
+    loadGuestPayments();
+
     // Check for user session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
@@ -135,12 +176,42 @@ const LogPayment = () => {
       return;
     }
 
-    // For push notifications, we can proceed without login (or with login)
+    // For push notifications, we can proceed without login
     if (notificationMethod === "push" && !user) {
-      toast.success("Push notification alert set! (Demo mode - no account required)", {
+      if (!amount || !dateReceived || !localCurrency || !paymentSource) {
+        toast.error("Please fill in all required fields");
+        return;
+      }
+
+      setIsLoading(true);
+
+      // Fetch exchange rates for guest payment
+      const rateAtReceipt = await fetchExchangeRate(paymentCurrency, localCurrency, dateReceived);
+      const currentRate = await fetchExchangeRate(paymentCurrency, localCurrency);
+
+      const guestPayment: Payment = {
+        id: crypto.randomUUID(),
+        amount: parseFloat(amount),
+        payment_currency: paymentCurrency,
+        date_received: dateReceived,
+        local_currency: localCurrency,
+        payment_source: paymentSource,
+        notification_type: notificationType,
+        notification_method: "push",
+        threshold: notificationType === "threshold" ? parseFloat(threshold) : 0,
+        is_active: true,
+        exchange_rate_at_receipt: rateAtReceipt,
+        last_checked_rate: currentRate,
+        last_rate_check: new Date().toISOString(),
+      };
+
+      saveGuestPayment(guestPayment);
+      
+      toast.success("Push notification alert set!", {
         icon: <Bell className="w-4 h-4" />,
       });
-      // Reset form for demo
+
+      // Reset form
       setAmount("");
       setPaymentCurrency("USD");
       setDateReceived("");
@@ -148,6 +219,7 @@ const LogPayment = () => {
       setPaymentSource("");
       setNotificationType("daily");
       setThreshold("2");
+      setIsLoading(false);
       return;
     }
 
@@ -460,10 +532,74 @@ const LogPayment = () => {
                   <div className="flex items-center justify-center py-12">
                     <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
                   </div>
-                ) : !user ? (
+                ) : !user && guestPayments.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <Bell className="w-12 h-12 mx-auto mb-4 opacity-30" />
-                    <p className="text-sm">Sign in to view your alerts.</p>
+                    <p className="text-sm">No alerts yet.</p>
+                    <p className="text-sm">Log a payment to start tracking.</p>
+                  </div>
+                ) : !user && guestPayments.length > 0 ? (
+                  <div className="space-y-4">
+                    <p className="text-xs text-muted-foreground bg-secondary/50 p-2 rounded-lg">
+                      <Smartphone className="w-3 h-3 inline mr-1" />
+                      Guest alerts (stored locally)
+                    </p>
+                    {guestPayments.map((payment) => (
+                      <div
+                        key={payment.id}
+                        className="p-4 rounded-xl bg-secondary/50 border border-border"
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <span className="text-xl font-bold">
+                            {getPaymentCurrencySymbol(payment.payment_currency)}{Number(payment.amount).toLocaleString()}
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-primary/10 text-primary">
+                              <Check className="w-3 h-3" />
+                              Tracking
+                            </div>
+                            <button
+                              onClick={() => removeGuestPayment(payment.id)}
+                              className="p-1 hover:bg-destructive/10 rounded-full transition-colors"
+                              title="Remove alert"
+                            >
+                              <Trash2 className="w-4 h-4 text-muted-foreground hover:text-destructive" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="text-sm text-muted-foreground space-y-1">
+                          <p>
+                            {payment.payment_currency} → {getCurrencySymbol(payment.local_currency)} {payment.local_currency}
+                          </p>
+                          <p>Source: {getSourceName(payment.payment_source)}</p>
+                          <p>Received: {new Date(payment.date_received).toLocaleDateString()}</p>
+                          {payment.exchange_rate_at_receipt && payment.last_checked_rate && (
+                            <div className="mt-2 p-2 bg-background/50 rounded-lg">
+                              <p className="text-xs">
+                                Rate at receipt: <span className="font-medium">{payment.exchange_rate_at_receipt.toFixed(4)}</span>
+                              </p>
+                              <p className="text-xs">
+                                Current rate: <span className="font-medium">{payment.last_checked_rate.toFixed(4)}</span>
+                              </p>
+                              {(() => {
+                                const change = ((payment.last_checked_rate - payment.exchange_rate_at_receipt) / payment.exchange_rate_at_receipt) * 100;
+                                return (
+                                  <p className={`text-xs font-medium ${change >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+                                    {change >= 0 ? '↑' : '↓'} {Math.abs(change).toFixed(2)}% since payment
+                                  </p>
+                                );
+                              })()}
+                            </div>
+                          )}
+                          <p className="text-xs flex items-center gap-1">
+                            <Smartphone className="w-3 h-3" />
+                            {payment.notification_type === "daily"
+                              ? "Daily alerts (vs payment date)"
+                              : `Alert at +${payment.threshold}% vs payment date`}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 ) : payments.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
