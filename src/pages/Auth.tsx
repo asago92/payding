@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { DollarSign, Loader2, Mail, Lock, ArrowLeft } from "lucide-react";
+import { DollarSign, Loader2, Mail, Lock, ArrowLeft, Chrome } from "lucide-react";
+import { lovable } from "@/integrations/lovable";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -164,6 +165,36 @@ const Auth = () => {
               ) : (
                 "Create Account"
               )}
+            </Button>
+
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-border"></div>
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+              </div>
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              size="lg"
+              className="w-full"
+              onClick={async () => {
+                setIsLoading(true);
+                const { error } = await lovable.auth.signInWithOAuth("google", {
+                  redirect_uri: window.location.origin,
+                });
+                if (error) {
+                  toast.error("Failed to sign in with Google");
+                  setIsLoading(false);
+                }
+              }}
+              disabled={isLoading}
+            >
+              <Chrome className="w-5 h-5 mr-2" />
+              Sign in with Google
             </Button>
           </form>
 
