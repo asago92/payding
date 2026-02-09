@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DollarSign, Loader2, Mail, Lock, ArrowLeft, Chrome, ArrowRight } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { lovable } from "@/integrations/lovable";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,6 +17,7 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [resetEmailSent, setResetEmailSent] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -61,6 +63,11 @@ const Auth = () => {
     e.preventDefault();
     setIsLoading(true);
 
+    if (!isLogin && !agreedToTerms) {
+      toast.error("Please agree to the Terms & Conditions to create an account.");
+      setIsLoading(false);
+      return;
+    }
     try {
       if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({
@@ -283,6 +290,24 @@ const Auth = () => {
                 />
               </div>
             </div>
+
+            {!isLogin && (
+              <div className="flex items-start gap-2">
+                <Checkbox
+                  id="terms"
+                  checked={agreedToTerms}
+                  onCheckedChange={(checked) => setAgreedToTerms(checked === true)}
+                  className="mt-0.5"
+                />
+                <label htmlFor="terms" className="text-sm text-muted-foreground leading-snug cursor-pointer">
+                  I agree to the{" "}
+                  <a href="/terms" target="_blank" className="text-primary hover:underline">
+                    Terms & Conditions
+                  </a>{" "}
+                  and acknowledge that Payding provides information, not financial advice.
+                </label>
+              </div>
+            )}
 
             <Button
               variant="hero"
