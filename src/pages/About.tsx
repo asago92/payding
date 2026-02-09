@@ -1,3 +1,5 @@
+import { ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -31,6 +33,15 @@ const About = () => {
               Now, we help thousands of global earners get the "raise" they
               deserve, just by waiting for the right notification.
             </p>
+          </div>
+
+          <div className="mt-10">
+            <a href="/#log-payment">
+              <Button size="lg" className="gap-2">
+                Start Logging Payments
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </a>
           </div>
         </div>
       </main>
