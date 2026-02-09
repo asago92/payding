@@ -15,7 +15,7 @@ const Footer = () => {
 
           {/* Info */}
           <p className="text-sm text-muted-foreground text-center">
-            Smart currency alerts for remote workers. Keep your funds in PayPal, Wise, or Upwork—we just notify you when to transfer.
+            Smart currency alerts for global earners. Keep your funds where they are—we just notify you when to transfer.
           </p>
 
           {/* Links */}
