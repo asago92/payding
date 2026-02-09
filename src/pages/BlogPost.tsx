@@ -7,6 +7,37 @@ import { blogPosts, BlogSection } from "@/data/blogPosts";
 import { format, parseISO } from "date-fns";
 import useSeo from "@/hooks/use-seo";
 
+const renderInlineLinks = (text: string) => {
+  const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+  const parts: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let match;
+
+  while ((match = linkRegex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(text.slice(lastIndex, match.index));
+    }
+    const isExternal = match[2].startsWith("http");
+    parts.push(
+      <a
+        key={match.index}
+        href={match[2]}
+        className="text-primary underline underline-offset-2 hover:text-primary/80 transition-colors"
+        {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+      >
+        {match[1]}
+      </a>
+    );
+    lastIndex = match.index + match[0].length;
+  }
+
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex));
+  }
+
+  return parts.length > 0 ? parts : text;
+};
+
 const renderSection = (section: BlogSection, index: number) => {
   switch (section.type) {
     case "heading":
@@ -33,7 +64,7 @@ const renderSection = (section: BlogSection, index: number) => {
           key={index}
           className="text-muted-foreground leading-relaxed mb-4"
         >
-          {section.text}
+          {renderInlineLinks(section.text!)}
         </p>
       );
     case "quote":
@@ -43,7 +74,7 @@ const renderSection = (section: BlogSection, index: number) => {
           className="border-l-4 border-primary pl-5 py-2 my-6 bg-primary/5 rounded-r-lg pr-5"
         >
           <p className="text-foreground italic leading-relaxed">
-            {section.text}
+            {renderInlineLinks(section.text!)}
           </p>
         </blockquote>
       );
@@ -65,10 +96,10 @@ const renderSection = (section: BlogSection, index: number) => {
                       <strong className="text-foreground">
                         {item.slice(0, colonIndex)}:
                       </strong>
-                      {item.slice(colonIndex + 1)}
+                      {renderInlineLinks(item.slice(colonIndex + 1))}
                     </>
                   ) : (
-                    item
+                    renderInlineLinks(item)
                   )}
                 </span>
               </li>

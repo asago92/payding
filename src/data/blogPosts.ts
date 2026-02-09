@@ -37,9 +37,9 @@ export const blogPosts: BlogPost[] = [
       {
         type: "list",
         items: [
-          "Provider Markups: Traditional banks typically charge between 2% and 5% of the total transfer amount as a hidden fee through exchange rate markups (Sable International).",
-          "Hidden Spreads: Some platforms can result in losses of up to 6% to 12% when combining service fees with unfavorable internal conversion rates (Wise Analysis).",
-          "Average Global Fees: The global average cost for sending international payments remains around 6.3%, more than double the UN's Sustainable Development goal (Our World in Data, 2025).",
+          "Provider Markups: Traditional banks typically charge between 2% and 5% of the total transfer amount as a hidden fee through exchange rate markups ([Sable International](https://www.sableinternational.com/blog/the-price-of-using-banks-for-fx-transfers)).",
+          "Hidden Spreads: Some platforms can result in losses of up to 6% to 12% when combining service fees with unfavorable internal conversion rates ([Wise Analysis](https://wise.com/us/blog/save-money-while-freelancing-for-international-clients)).",
+          "Average Global Fees: The global average cost for sending international payments remains around 6.3%, more than double the UN's Sustainable Development goal ([Our World in Data, 2025](https://ourworldindata.org/data-insights/transfer-fees-for-money-sent-home-by-international-migrants-were-nearly-as-high-as-us-foreign-aid-in-2023)).",
         ],
       },
       {
@@ -57,8 +57,8 @@ export const blogPosts: BlogPost[] = [
       {
         type: "list",
         items: [
-          "Volatility Impact: Recent studies show that for freelancers in emerging markets, exchange rate volatility has a direct negative impact on net income, often requiring an additional 5% to 8% of gross pay just to cover unreimbursed transaction and conversion expenses (NBER Research, 2026).",
-          'The "Convenience" Cost: Many freelancers lose significantly because platforms force "Auto-Sweep" conversions at the weakest point of the week, often costing users 10x more than using a specialized timing strategy (Cenoa Freelancer Guide, 2026).',
+          "Volatility Impact: Recent studies show that for freelancers in emerging markets, exchange rate volatility has a direct negative impact on net income, often requiring an additional 5% to 8% of gross pay just to cover unreimbursed transaction and conversion expenses ([NBER Research, 2026](https://www.nber.org/system/files/chapters/c15173/c15173.pdf)).",
+          'The "Convenience" Cost: Many freelancers lose significantly because platforms force "Auto-Sweep" conversions at the weakest point of the week, often costing users 10x more than using a specialized timing strategy ([Cenoa Freelancer Guide, 2026](https://www.cenoa.com/blog/freelancers-guide-getting-paid-in-usd-without-losing-on-exchange-rates)).',
         ],
       },
       {
@@ -70,7 +70,7 @@ export const blogPosts: BlogPost[] = [
         items: [
           'Stop Automatic Withdrawals: Never let a platform "Auto-Sweep" your funds. They usually pick the most convenient time for them, not the most profitable for you.',
           'Benchmark Your "Received Date": Always compare today\'s rate to the rate on the day the money hit your account. If today is worse, wait.',
-          'Use a Tracker: Use tools like Payding to get a "Ping" when the market moves in your favor.',
+          'Use a Tracker: Use tools like [Payding](/#log-payment) to get a "Ping" when the market moves in your favor.',
         ],
       },
       {
