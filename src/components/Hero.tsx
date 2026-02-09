@@ -31,7 +31,7 @@ const Hero = () => {
           {/* Subheadline */}
           <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 animate-slide-up" style={{ animationDelay: "0.2s" }}>
             Stop guessing when to transfer your earnings. Get notified when your 
-            local payout beats the day you were paid—no accounts, no hassle.
+            local payout beats the day you were paid—no hassle.
           </p>
 
           {/* CTA Buttons */}
@@ -46,7 +46,7 @@ const Hero = () => {
           <div className="flex flex-wrap items-center justify-center gap-8 text-muted-foreground animate-fade-in" style={{ animationDelay: "0.5s" }}>
             <div className="flex items-center gap-2">
               <DollarSign className="w-5 h-5 text-primary" />
-              <span className="text-sm">Works with any payment platform</span>
+              <span className="text-sm">No bank logins needed</span>
             </div>
             <div className="flex items-center gap-2">
               <Bell className="w-5 h-5 text-primary" />
