@@ -27,6 +27,13 @@ const Footer = () => {
               Terms & Conditions
             </a>
             <span className="text-muted-foreground/40">·</span>
+            <a
+              href="/privacy"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Privacy Policy
+            </a>
+            <span className="text-muted-foreground/40">·</span>
             <p className="text-sm text-muted-foreground">
               © {new Date().getFullYear()} Payding
             </p>
