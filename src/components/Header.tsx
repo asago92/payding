@@ -63,6 +63,12 @@ const Header = () => {
               About Us
             </a>
             <a
+              href="/blog"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Blog
+            </a>
+            <a
               href="#faq"
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
