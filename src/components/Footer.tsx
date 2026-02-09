@@ -18,10 +18,19 @@ const Footer = () => {
             Smart currency alerts for remote workers. Keep your funds in PayPal, Wise, or Upwork—we just notify you when to transfer.
           </p>
 
-          {/* Copyright */}
-          <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Payding
-          </p>
+          {/* Links */}
+          <div className="flex items-center gap-4">
+            <a
+              href="/terms"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Terms & Conditions
+            </a>
+            <span className="text-muted-foreground/40">·</span>
+            <p className="text-sm text-muted-foreground">
+              © {new Date().getFullYear()} Payding
+            </p>
+          </div>
         </div>
       </div>
     </footer>
