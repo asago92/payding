@@ -46,7 +46,7 @@ const Hero = () => {
           <div className="flex flex-wrap items-center justify-center gap-8 text-muted-foreground animate-fade-in" style={{ animationDelay: "0.5s" }}>
             <div className="flex items-center gap-2">
               <DollarSign className="w-5 h-5 text-primary" />
-              <span className="text-sm">Works with PayPal, Wise, Upwork</span>
+              <span className="text-sm">Works with any payment platform</span>
             </div>
             <div className="flex items-center gap-2">
               <Bell className="w-5 h-5 text-primary" />
