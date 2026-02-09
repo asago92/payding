@@ -2,8 +2,14 @@ import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import useSeo from "@/hooks/use-seo";
 
 const About = () => {
+  useSeo({
+    title: "About Us",
+    description: "Learn how Payding helps global earners stop losing money on poorly timed currency conversions.",
+    path: "/about",
+  });
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
