@@ -16,7 +16,7 @@ const Hero = () => {
           <div className="inline-flex items-center gap-2 px-4 py-2 mb-8 rounded-full bg-secondary border border-border animate-fade-in">
             <Bell className="w-4 h-4 text-primary" />
             <span className="text-sm font-medium text-secondary-foreground">
-              Smart currency notifications for remote workers
+              Smart currency notifications for global earners
             </span>
           </div>
 
