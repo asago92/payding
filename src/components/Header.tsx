@@ -56,6 +56,12 @@ const Header = () => {
             >
               Log Payment
             </a>
+            <a
+              href="/about"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              About Us
+            </a>
           </nav>
 
           {/* Auth CTA */}
