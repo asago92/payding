@@ -1,9 +1,11 @@
+import { useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ArrowLeft, Calendar, Clock } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { blogPosts, BlogSection } from "@/data/blogPosts";
 import { format, parseISO } from "date-fns";
+import useSeo from "@/hooks/use-seo";
 
 const renderSection = (section: BlogSection, index: number) => {
   switch (section.type) {
@@ -82,6 +84,35 @@ const renderSection = (section: BlogSection, index: number) => {
 const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
   const post = blogPosts.find((p) => p.slug === slug);
+
+  useSeo({
+    title: post?.title ?? "Post not found",
+    description: post?.excerpt ?? "This blog post could not be found.",
+    path: `/blog/${slug}`,
+    type: "article",
+    publishedDate: post?.date,
+  });
+
+  // Inject JSON-LD for article structured data
+  useEffect(() => {
+    if (!post) return;
+    const jsonLd = {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      headline: post.title,
+      description: post.excerpt,
+      datePublished: post.date,
+      author: { "@type": "Organization", name: "Payding" },
+      publisher: { "@type": "Organization", name: "Payding" },
+    };
+    const script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.textContent = JSON.stringify(jsonLd);
+    document.head.appendChild(script);
+    return () => {
+      document.head.removeChild(script);
+    };
+  }, [post]);
 
   if (!post) {
     return (
