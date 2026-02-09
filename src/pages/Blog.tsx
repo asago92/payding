@@ -4,8 +4,14 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { blogPosts } from "@/data/blogPosts";
 import { format, parseISO } from "date-fns";
+import useSeo from "@/hooks/use-seo";
 
 const Blog = () => {
+  useSeo({
+    title: "Blog",
+    description: "Tips and insights for global earners to maximize their income through smarter currency conversions.",
+    path: "/blog",
+  });
   return (
     <div className="min-h-screen bg-background">
       <Header />
