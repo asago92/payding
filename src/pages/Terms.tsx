@@ -1,7 +1,13 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import useSeo from "@/hooks/use-seo";
 
 const Terms = () => {
+  useSeo({
+    title: "Terms & Conditions",
+    description: "Read the terms and conditions for using Payding, a currency rate notification tool for global earners.",
+    path: "/terms",
+  });
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header />

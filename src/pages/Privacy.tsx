@@ -1,7 +1,13 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import useSeo from "@/hooks/use-seo";
 
 const Privacy = () => {
+  useSeo({
+    title: "Privacy Policy",
+    description: "Learn how Payding protects your data. We never ask for bank logins or sensitive credentials.",
+    path: "/privacy",
+  });
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
