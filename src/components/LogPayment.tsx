@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Check, Bell, TrendingUp, Plus, Mail, Smartphone, Loader2, Trash2, Globe } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -98,6 +99,7 @@ const LogPayment = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   const GUEST_PAYMENTS_KEY = "payding_guest_alerts";
 
@@ -207,6 +209,10 @@ const LogPayment = () => {
 
     // For push notifications, we can proceed without login
     if (notificationMethod === "push" && !user) {
+      if (!agreedToTerms) {
+        toast.error("Please agree to the Terms & Conditions before logging a payment.");
+        return;
+      }
       if (!amount || !dateReceived || !localCurrency || !paymentSource) {
         toast.error("Please fill in all required fields");
         return;
@@ -552,6 +558,24 @@ const LogPayment = () => {
                   <p className="text-xs text-muted-foreground text-center bg-secondary/50 p-3 rounded-lg">
                     <strong>TL;DR:</strong> We provide the data, but you make the call. We aren't responsible for market shifts or how your bank handles your money.
                   </p>
+
+                  {!user && (
+                    <div className="flex items-start gap-2">
+                      <Checkbox
+                        id="guest-terms"
+                        checked={agreedToTerms}
+                        onCheckedChange={(checked) => setAgreedToTerms(checked === true)}
+                        className="mt-0.5"
+                      />
+                      <label htmlFor="guest-terms" className="text-sm text-muted-foreground leading-snug cursor-pointer">
+                        I agree to the{" "}
+                        <a href="/terms" target="_blank" className="text-primary hover:underline">
+                          Terms & Conditions
+                        </a>{" "}
+                        and acknowledge that Payding provides information, not financial advice.
+                      </label>
+                    </div>
+                  )}
 
                   <Button 
                     variant="hero" 
