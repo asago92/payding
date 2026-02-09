@@ -62,6 +62,12 @@ const Header = () => {
             >
               About Us
             </a>
+            <a
+              href="#faq"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              FAQ
+            </a>
           </nav>
 
           {/* Auth CTA */}
