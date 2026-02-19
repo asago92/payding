@@ -12,6 +12,11 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
 const currencies = [
+  { code: "USD", name: "US Dollar", symbol: "$" },
+  { code: "EUR", name: "Euro", symbol: "€" },
+  { code: "GBP", name: "British Pound", symbol: "£" },
+  { code: "CAD", name: "Canadian Dollar", symbol: "C$" },
+  { code: "AUD", name: "Australian Dollar", symbol: "A$" },
   { code: "NGN", name: "Nigerian Naira", symbol: "₦" },
   { code: "KES", name: "Kenyan Shilling", symbol: "KSh" },
   { code: "GHS", name: "Ghanaian Cedi", symbol: "₵" },
