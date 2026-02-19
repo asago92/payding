@@ -270,15 +270,11 @@ Deno.serve(async (req) => {
   </table>
 </td></tr>
 
-<!-- CTA Button -->
-<tr><td style="padding:28px 32px 0;text-align:center;">
-  <a href="https://payding.lovable.app" style="display:inline-block;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#ffffff;text-decoration:none;padding:13px 36px;border-radius:10px;font-weight:600;font-size:14px;letter-spacing:-0.2px;">View Dashboard</a>
-</td></tr>
-
 <!-- Footer -->
 <tr><td style="padding:28px 32px;text-align:center;">
   <p style="margin:0;color:#9ca3af;font-size:11px;line-height:1.6;">
     You're receiving this because you set up a ${payment.notification_type} alert on Payding.<br/>
+    <a href="${Deno.env.get('SUPABASE_URL')}/functions/v1/unsubscribe?id=${payment.id}" style="color:#6b7280;text-decoration:underline;">Unsubscribe from this alert</a><br/>
     © ${new Date().getFullYear()} Payding · All rights reserved
   </p>
 </td></tr>
@@ -428,12 +424,10 @@ Deno.serve(async (req) => {
     </td></tr>
   </table>
 </td></tr>
-<tr><td style="padding:28px 32px 0;text-align:center;">
-  <a href="https://payding.lovable.app" style="display:inline-block;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#ffffff;text-decoration:none;padding:13px 36px;border-radius:10px;font-weight:600;font-size:14px;letter-spacing:-0.2px;">View Dashboard</a>
-</td></tr>
 <tr><td style="padding:28px 32px;text-align:center;">
   <p style="margin:0;color:#9ca3af;font-size:11px;line-height:1.6;">
     This is a test email from Payding.<br/>
+    <a href="#" style="color:#6b7280;text-decoration:underline;">Unsubscribe from this alert</a><br/>
     © ${new Date().getFullYear()} Payding · All rights reserved
   </p>
 </td></tr>
