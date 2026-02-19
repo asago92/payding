@@ -172,10 +172,18 @@ Deno.serve(async (req) => {
                 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
                 if (RESEND_API_KEY) {
                   const direction = percentChange >= 0 ? 'improved' : 'dropped'
-                  const emoji = percentChange >= 0 ? '📈' : '📉'
-                  const actionText = percentChange >= 0 
-                    ? "Now might be a good time to convert!" 
-                    : "You may want to wait for a better rate."
+                  const isPositive = percentChange >= 0
+                  const actionText = isPositive 
+                    ? "The rate has improved — now might be a good time to convert." 
+                    : "The rate has dipped. You may want to hold off for now."
+                  
+                  // Calculate local currency equivalents
+                  const localAmountAtReceipt = (payment.amount * rateAtReceipt).toFixed(2)
+                  const localAmountNow = (payment.amount * currentRate).toFixed(2)
+                  const localDifference = (payment.amount * currentRate - payment.amount * rateAtReceipt).toFixed(2)
+                  const accentColor = isPositive ? '#059669' : '#dc2626'
+                  const accentBg = isPositive ? '#ecfdf5' : '#fef2f2'
+                  const arrow = isPositive ? '↑' : '↓'
 
                   const resendResponse = await fetch('https://api.resend.com/emails', {
                     method: 'POST',
@@ -186,45 +194,99 @@ Deno.serve(async (req) => {
                     body: JSON.stringify({
                       from: 'Payding <alerts@contact.payding.xyz>',
                       to: [profile.email],
-                      subject: `${emoji} ${payment.payment_currency}/${payment.local_currency} rate ${direction} ${Math.abs(percentChange).toFixed(2)}%`,
+                      subject: `${arrow} ${payment.payment_currency}/${payment.local_currency} ${direction} ${Math.abs(percentChange).toFixed(2)}% — ${payment.payment_source}`,
                       html: `
-                        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
-                          <div style="text-align: center; margin-bottom: 32px;">
-                            <div style="display: inline-block; background: linear-gradient(135deg, #6366f1, #8b5cf6); width: 48px; height: 48px; border-radius: 12px; line-height: 48px; color: white; font-size: 24px; font-weight: bold;">$</div>
-                            <h1 style="margin: 16px 0 0; font-size: 24px; color: #1a1a2e;">Exchange Rate Alert</h1>
-                          </div>
-                          
-                          <div style="background: #f8f9fa; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
-                            <p style="margin: 0 0 8px; color: #4a4a68; font-size: 14px;">Your ${payment.payment_currency} ${payment.amount} payment from ${payment.payment_source}</p>
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
-                              <div>
-                                <p style="margin: 0; color: #8888a0; font-size: 12px;">Rate at receipt (${payment.date_received})</p>
-                                <p style="margin: 4px 0 0; color: #1a1a2e; font-size: 20px; font-weight: bold;">1 ${payment.payment_currency} = ${rateAtReceipt.toFixed(4)} ${payment.local_currency}</p>
-                              </div>
-                            </div>
-                            <div>
-                              <p style="margin: 0; color: #8888a0; font-size: 12px;">Current rate</p>
-                              <p style="margin: 4px 0 0; color: ${percentChange >= 0 ? '#16a34a' : '#dc2626'}; font-size: 20px; font-weight: bold;">1 ${payment.payment_currency} = ${currentRate.toFixed(4)} ${payment.local_currency}</p>
-                            </div>
-                          </div>
-                          
-                          <div style="text-align: center; background: ${percentChange >= 0 ? '#f0fdf4' : '#fef2f2'}; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
-                            <p style="margin: 0; font-size: 28px;">${emoji}</p>
-                            <p style="margin: 8px 0 0; color: ${percentChange >= 0 ? '#16a34a' : '#dc2626'}; font-size: 18px; font-weight: bold;">${percentChange >= 0 ? '+' : ''}${percentChange.toFixed(2)}% change</p>
-                            <p style="margin: 8px 0 0; color: #4a4a68; font-size: 14px;">${actionText}</p>
-                          </div>
-                          
-                          <div style="text-align: center; margin: 32px 0;">
-                            <a href="https://payding.lovable.app" style="display: inline-block; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">
-                              View Dashboard →
-                            </a>
-                          </div>
-                          
-                          <p style="color: #8888a0; font-size: 12px; text-align: center; margin-top: 40px; border-top: 1px solid #e5e5f0; padding-top: 20px;">
-                            You're receiving this because you set up a ${payment.notification_type} alert on Payding.<br/>
-                            © ${new Date().getFullYear()} Payding. All rights reserved.
-                          </p>
-                        </div>
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f4f4f7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f7;padding:32px 16px;">
+<tr><td align="center">
+<table width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+
+<!-- Header -->
+<tr><td style="background:linear-gradient(135deg,#4f46e5,#7c3aed);padding:28px 32px;text-align:center;">
+  <table cellpadding="0" cellspacing="0" style="margin:0 auto;"><tr>
+    <td style="width:36px;height:36px;background:rgba(255,255,255,0.2);border-radius:10px;text-align:center;vertical-align:middle;color:#fff;font-size:18px;font-weight:700;line-height:36px;">P</td>
+    <td style="padding-left:12px;color:#ffffff;font-size:18px;font-weight:600;letter-spacing:-0.3px;">Payding</td>
+  </tr></table>
+</td></tr>
+
+<!-- Change Badge -->
+<tr><td style="padding:28px 32px 0;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:${accentBg};border-radius:12px;">
+    <tr><td style="padding:20px;text-align:center;">
+      <span style="font-size:32px;font-weight:700;color:${accentColor};letter-spacing:-1px;">${isPositive ? '+' : ''}${percentChange.toFixed(2)}%</span>
+      <p style="margin:6px 0 0;color:${accentColor};font-size:13px;font-weight:500;">${actionText}</p>
+    </td></tr>
+  </table>
+</td></tr>
+
+<!-- Payment Info -->
+<tr><td style="padding:24px 32px 0;">
+  <p style="margin:0 0 4px;color:#6b7280;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.5px;">Payment</p>
+  <p style="margin:0;color:#111827;font-size:17px;font-weight:600;">${payment.payment_currency} ${Number(payment.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })} from ${payment.payment_source}</p>
+</td></tr>
+
+<!-- Rate Comparison -->
+<tr><td style="padding:20px 32px 0;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">
+    <tr>
+      <td width="50%" style="padding:16px;border-right:1px solid #e5e7eb;vertical-align:top;">
+        <p style="margin:0 0 2px;color:#9ca3af;font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.4px;">At receipt</p>
+        <p style="margin:0;color:#374151;font-size:15px;font-weight:600;">${rateAtReceipt.toFixed(4)}</p>
+        <p style="margin:4px 0 0;color:#6b7280;font-size:12px;">${payment.date_received}</p>
+      </td>
+      <td width="50%" style="padding:16px;vertical-align:top;">
+        <p style="margin:0 0 2px;color:#9ca3af;font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.4px;">Current</p>
+        <p style="margin:0;color:${accentColor};font-size:15px;font-weight:600;">${currentRate.toFixed(4)}</p>
+        <p style="margin:4px 0 0;color:#6b7280;font-size:12px;">1 ${payment.payment_currency} → ${payment.local_currency}</p>
+      </td>
+    </tr>
+  </table>
+</td></tr>
+
+<!-- Local Currency Equivalent -->
+<tr><td style="padding:20px 32px 0;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9fafb;border-radius:12px;">
+    <tr><td style="padding:16px;">
+      <p style="margin:0 0 10px;color:#9ca3af;font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.4px;">Local currency equivalent (${payment.local_currency})</p>
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td style="color:#6b7280;font-size:13px;">At receipt</td>
+          <td align="right" style="color:#374151;font-size:13px;font-weight:600;">${payment.local_currency} ${Number(localAmountAtReceipt).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+        </tr>
+        <tr><td colspan="2" style="padding:6px 0;"><div style="border-top:1px solid #e5e7eb;"></div></td></tr>
+        <tr>
+          <td style="color:#6b7280;font-size:13px;">Today</td>
+          <td align="right" style="color:#374151;font-size:13px;font-weight:600;">${payment.local_currency} ${Number(localAmountNow).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+        </tr>
+        <tr><td colspan="2" style="padding:6px 0;"><div style="border-top:1px solid #e5e7eb;"></div></td></tr>
+        <tr>
+          <td style="color:${accentColor};font-size:13px;font-weight:600;">Difference</td>
+          <td align="right" style="color:${accentColor};font-size:13px;font-weight:700;">${isPositive ? '+' : ''}${payment.local_currency} ${Number(localDifference).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</td></tr>
+
+<!-- CTA Button -->
+<tr><td style="padding:28px 32px 0;text-align:center;">
+  <a href="https://payding.lovable.app" style="display:inline-block;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#ffffff;text-decoration:none;padding:13px 36px;border-radius:10px;font-weight:600;font-size:14px;letter-spacing:-0.2px;">View Dashboard</a>
+</td></tr>
+
+<!-- Footer -->
+<tr><td style="padding:28px 32px;text-align:center;">
+  <p style="margin:0;color:#9ca3af;font-size:11px;line-height:1.6;">
+    You're receiving this because you set up a ${payment.notification_type} alert on Payding.<br/>
+    © ${new Date().getFullYear()} Payding · All rights reserved
+  </p>
+</td></tr>
+
+</table>
+</td></tr>
+</table>
+</body></html>
                       `,
                     }),
                   })
