@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,28 +21,15 @@ const Auth = () => {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const navigate = useNavigate();
 
-  const sendWelcomeEmail = useCallback(async () => {
-    try {
-      await supabase.functions.invoke('send-welcome-email', {
-        body: {},
-      });
-    } catch (err) {
-      console.error('Welcome email error:', err);
-    }
-  }, []);
   useEffect(() => {
-    // Check if user is already logged in
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         navigate("/");
       }
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
-        if (event === 'SIGNED_IN') {
-          sendWelcomeEmail();
-        }
         navigate("/");
       }
     });
