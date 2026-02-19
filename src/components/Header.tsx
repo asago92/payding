@@ -75,79 +75,79 @@ const Header = () => {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
-      <div className="container px-4">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <a href="/" className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-lg gradient-hero flex items-center justify-center">
-              <DollarSign className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <span className="font-bold text-xl">Payding</span>
-          </a>
+    <>
+      <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
+        <div className="container px-4">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <a href="/" className="flex items-center gap-2">
+              <div className="w-9 h-9 rounded-lg gradient-hero flex items-center justify-center">
+                <DollarSign className="w-5 h-5 text-primary-foreground" />
+              </div>
+              <span className="font-bold text-xl">Payding</span>
+            </a>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleNavClick(link.href);
-                }}
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {link.label}
-              </a>
-            ))}
-          </nav>
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center gap-8">
+              {navLinks.map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNavClick(link.href);
+                  }}
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {link.label}
+                </a>
+              ))}
+            </nav>
 
-          {/* Desktop Auth CTA */}
-          <div className="hidden md:flex">
-            {user ? (
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <User className="w-4 h-4" />
-                  <span className="max-w-[150px] truncate">{user.email}</span>
+            {/* Desktop Auth CTA */}
+            <div className="hidden md:flex">
+              {user ? (
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <User className="w-4 h-4" />
+                    <span className="max-w-[150px] truncate">{user.email}</span>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={handleSignOut}>
+                    <LogOut className="w-4 h-4" />
+                    <span className="ml-2">Sign Out</span>
+                  </Button>
                 </div>
-                <Button variant="outline" size="sm" onClick={handleSignOut}>
-                  <LogOut className="w-4 h-4" />
-                  <span className="ml-2">Sign Out</span>
-                </Button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={() => navigate("/auth")}>
-                  Sign In
-                </Button>
-                <Button variant="default" size="sm" onClick={() => navigate("/auth?signup=true")}>
-                  Create Account
-                </Button>
-              </div>
-            )}
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={() => navigate("/auth")}>
+                    Sign In
+                  </Button>
+                  <Button variant="default" size="sm" onClick={() => navigate("/auth?signup=true")}>
+                    Create Account
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              className="md:hidden p-2 rounded-lg hover:bg-secondary transition-colors"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+            >
+              {mobileMenuOpen ? (
+                <X className="w-6 h-6" />
+              ) : (
+                <Menu className="w-6 h-6" />
+              )}
+            </button>
           </div>
-
-          {/* Mobile Menu Button */}
-          <button
-            className="md:hidden p-2 rounded-lg hover:bg-secondary transition-colors"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-          >
-            {mobileMenuOpen ? (
-              <X className="w-6 h-6" />
-            ) : (
-              <Menu className="w-6 h-6" />
-            )}
-          </button>
         </div>
-      </div>
+      </header>
 
-      {/* Mobile Menu Overlay */}
+      {/* Mobile Menu Overlay - rendered outside header to avoid stacking context issues */}
       {mobileMenuOpen && (
-        <div
-          className="fixed inset-0 top-16 z-40 bg-background/95 backdrop-blur-lg md:hidden animate-fade-in"
-        >
+        <div className="fixed inset-x-0 top-16 bottom-0 z-[100] bg-background overflow-y-auto md:hidden">
           <nav className="flex flex-col p-6 gap-2">
             {navLinks.map((link) => (
               <a
@@ -189,7 +189,7 @@ const Header = () => {
           </nav>
         </div>
       )}
-    </header>
+    </>
   );
 };
 
