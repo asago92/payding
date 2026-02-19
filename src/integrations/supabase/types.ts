@@ -81,6 +81,7 @@ export type Database = {
           id: string
           updated_at: string
           user_id: string
+          welcome_email_sent: boolean
         }
         Insert: {
           created_at?: string
@@ -88,6 +89,7 @@ export type Database = {
           id?: string
           updated_at?: string
           user_id: string
+          welcome_email_sent?: boolean
         }
         Update: {
           created_at?: string
@@ -95,6 +97,7 @@ export type Database = {
           id?: string
           updated_at?: string
           user_id?: string
+          welcome_email_sent?: boolean
         }
         Relationships: []
       }
