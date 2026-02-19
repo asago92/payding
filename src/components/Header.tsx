@@ -22,11 +22,17 @@ const Header = () => {
   }, []);
 
   const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
+    try {
+      const { error } = await supabase.auth.signOut({ scope: 'local' });
+      if (error) {
+        toast.error("Failed to sign out");
+      } else {
+        setUser(null);
+        toast.success("Signed out successfully");
+        navigate("/");
+      }
+    } catch (err) {
       toast.error("Failed to sign out");
-    } else {
-      toast.success("Signed out successfully");
     }
   };
 
