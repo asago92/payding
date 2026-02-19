@@ -34,6 +34,13 @@ const Footer = () => {
               Privacy Policy
             </a>
             <span className="text-muted-foreground/40">·</span>
+            <a
+              href="mailto:contact@payding.xyz"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              contact@payding.xyz
+            </a>
+            <span className="text-muted-foreground/40">·</span>
             <p className="text-sm text-muted-foreground">
               © {new Date().getFullYear()} Payding
             </p>
