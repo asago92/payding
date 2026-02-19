@@ -63,7 +63,7 @@ function buildWelcomeHtml(): string {
   </table>
 </td></tr>
 <tr><td style="padding:28px 32px 0;text-align:center;">
-  <a href="https://payding.lovable.app" style="display:inline-block;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#ffffff;text-decoration:none;padding:13px 36px;border-radius:10px;font-weight:600;font-size:14px;letter-spacing:-0.2px;">Get Started</a>
+  <a href="https://www.payding.xyz/" style="display:inline-block;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#ffffff;text-decoration:none;padding:13px 36px;border-radius:10px;font-weight:600;font-size:14px;letter-spacing:-0.2px;">Get Started</a>
 </td></tr>
 <tr><td style="padding:28px 32px;text-align:center;">
   <p style="margin:0;color:#9ca3af;font-size:11px;line-height:1.6;">© ${year} Payding · All rights reserved</p>
