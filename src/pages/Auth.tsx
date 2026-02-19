@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +20,22 @@ const Auth = () => {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const navigate = useNavigate();
 
+  const sendWelcomeEmail = useCallback(async () => {
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('welcome_email_sent')
+        .single();
+
+      if (profile && !profile.welcome_email_sent) {
+        await supabase.functions.invoke('send-welcome-email', {
+          body: {},
+        });
+      }
+    } catch (err) {
+      console.error('Welcome email error:', err);
+    }
+  }, []);
   useEffect(() => {
     // Check if user is already logged in
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -28,8 +44,11 @@ const Auth = () => {
       }
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session) {
+        if (event === 'SIGNED_IN') {
+          sendWelcomeEmail();
+        }
         navigate("/");
       }
     });
@@ -83,6 +102,7 @@ const Auth = () => {
           }
         } else {
           toast.success("Welcome back!");
+          sendWelcomeEmail();
           navigate("/");
         }
       } else {
@@ -102,6 +122,7 @@ const Auth = () => {
           }
         } else {
           toast.success("Account created successfully!");
+          sendWelcomeEmail();
           navigate("/");
         }
       }
