@@ -22,16 +22,9 @@ const Auth = () => {
 
   const sendWelcomeEmail = useCallback(async () => {
     try {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('welcome_email_sent')
-        .single();
-
-      if (profile && !profile.welcome_email_sent) {
-        await supabase.functions.invoke('send-welcome-email', {
-          body: {},
-        });
-      }
+      await supabase.functions.invoke('send-welcome-email', {
+        body: {},
+      });
     } catch (err) {
       console.error('Welcome email error:', err);
     }
