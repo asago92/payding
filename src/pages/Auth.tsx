@@ -93,9 +93,8 @@ const Auth = () => {
           } else {
             toast.error(error.message);
           }
-        } else {
+      } else {
           toast.success("Welcome back!");
-          sendWelcomeEmail();
           navigate("/");
         }
       } else {
@@ -114,9 +113,7 @@ const Auth = () => {
             toast.error(error.message);
           }
         } else {
-          toast.success("Account created successfully!");
-          sendWelcomeEmail();
-          navigate("/");
+          toast.success("Check your email to confirm your account!");
         }
       }
     } catch (error: any) {
