@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -104,14 +105,39 @@ const LogPayment = () => {
   const GUEST_PAYMENTS_KEY = "payding_guest_alerts";
 
   // Load guest payments from localStorage
+  const GuestPaymentSchema = z.object({
+    id: z.string(),
+    amount: z.number(),
+    payment_currency: z.string(),
+    date_received: z.string(),
+    local_currency: z.string(),
+    payment_source: z.string(),
+    notification_type: z.string(),
+    notification_method: z.string(),
+    threshold: z.number(),
+    is_active: z.boolean(),
+    exchange_rate_at_receipt: z.number().nullable(),
+    last_checked_rate: z.number().nullable(),
+    last_rate_check: z.string().nullable(),
+    timezone: z.string().optional(),
+  });
+
   const loadGuestPayments = () => {
     try {
       const stored = localStorage.getItem(GUEST_PAYMENTS_KEY);
       if (stored) {
-        setGuestPayments(JSON.parse(stored));
+        const parsed = JSON.parse(stored);
+        const validated = z.array(GuestPaymentSchema).safeParse(parsed);
+        if (validated.success) {
+          setGuestPayments(validated.data as Payment[]);
+        } else {
+          console.warn('Invalid guest payments data, clearing');
+          localStorage.removeItem(GUEST_PAYMENTS_KEY);
+        }
       }
     } catch (e) {
       console.error("Error loading guest payments:", e);
+      localStorage.removeItem(GUEST_PAYMENTS_KEY);
     }
   };
 
