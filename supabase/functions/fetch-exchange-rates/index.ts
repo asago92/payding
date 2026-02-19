@@ -158,6 +158,90 @@ Deno.serve(async (req) => {
             payment.notification_type === 'daily' ||
             (payment.notification_type === 'threshold' && percentChange >= (payment.threshold || 0))
 
+          // Send email if needed
+          if (shouldNotify && payment.notification_method === 'email') {
+            try {
+              // Get user email from profiles
+              const { data: profile } = await supabase
+                .from('profiles')
+                .select('email')
+                .eq('user_id', payment.user_id)
+                .single()
+
+              if (profile?.email) {
+                const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
+                if (RESEND_API_KEY) {
+                  const direction = percentChange >= 0 ? 'improved' : 'dropped'
+                  const emoji = percentChange >= 0 ? '📈' : '📉'
+                  const actionText = percentChange >= 0 
+                    ? "Now might be a good time to convert!" 
+                    : "You may want to wait for a better rate."
+
+                  const resendResponse = await fetch('https://api.resend.com/emails', {
+                    method: 'POST',
+                    headers: {
+                      'Authorization': `Bearer ${RESEND_API_KEY}`,
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                      from: 'Payding <alerts@contact.payding.xyz>',
+                      to: [profile.email],
+                      subject: `${emoji} ${payment.payment_currency}/${payment.local_currency} rate ${direction} ${Math.abs(percentChange).toFixed(2)}%`,
+                      html: `
+                        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+                          <div style="text-align: center; margin-bottom: 32px;">
+                            <div style="display: inline-block; background: linear-gradient(135deg, #6366f1, #8b5cf6); width: 48px; height: 48px; border-radius: 12px; line-height: 48px; color: white; font-size: 24px; font-weight: bold;">$</div>
+                            <h1 style="margin: 16px 0 0; font-size: 24px; color: #1a1a2e;">Exchange Rate Alert</h1>
+                          </div>
+                          
+                          <div style="background: #f8f9fa; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+                            <p style="margin: 0 0 8px; color: #4a4a68; font-size: 14px;">Your ${payment.payment_currency} ${payment.amount} payment from ${payment.payment_source}</p>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
+                              <div>
+                                <p style="margin: 0; color: #8888a0; font-size: 12px;">Rate at receipt (${payment.date_received})</p>
+                                <p style="margin: 4px 0 0; color: #1a1a2e; font-size: 20px; font-weight: bold;">1 ${payment.payment_currency} = ${rateAtReceipt.toFixed(4)} ${payment.local_currency}</p>
+                              </div>
+                            </div>
+                            <div>
+                              <p style="margin: 0; color: #8888a0; font-size: 12px;">Current rate</p>
+                              <p style="margin: 4px 0 0; color: ${percentChange >= 0 ? '#16a34a' : '#dc2626'}; font-size: 20px; font-weight: bold;">1 ${payment.payment_currency} = ${currentRate.toFixed(4)} ${payment.local_currency}</p>
+                            </div>
+                          </div>
+                          
+                          <div style="text-align: center; background: ${percentChange >= 0 ? '#f0fdf4' : '#fef2f2'}; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+                            <p style="margin: 0; font-size: 28px;">${emoji}</p>
+                            <p style="margin: 8px 0 0; color: ${percentChange >= 0 ? '#16a34a' : '#dc2626'}; font-size: 18px; font-weight: bold;">${percentChange >= 0 ? '+' : ''}${percentChange.toFixed(2)}% change</p>
+                            <p style="margin: 8px 0 0; color: #4a4a68; font-size: 14px;">${actionText}</p>
+                          </div>
+                          
+                          <div style="text-align: center; margin: 32px 0;">
+                            <a href="https://payding.lovable.app" style="display: inline-block; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px;">
+                              View Dashboard →
+                            </a>
+                          </div>
+                          
+                          <p style="color: #8888a0; font-size: 12px; text-align: center; margin-top: 40px; border-top: 1px solid #e5e5f0; padding-top: 20px;">
+                            You're receiving this because you set up a ${payment.notification_type} alert on Payding.<br/>
+                            © ${new Date().getFullYear()} Payding. All rights reserved.
+                          </p>
+                        </div>
+                      `,
+                    }),
+                  })
+
+                  if (!resendResponse.ok) {
+                    const errText = await resendResponse.text()
+                    console.error(`Failed to send alert email for payment ${payment.id}: ${errText}`)
+                  } else {
+                    console.log(`Alert email sent to ${profile.email} for payment ${payment.id}`)
+                  }
+                }
+              }
+            } catch (emailError) {
+              console.error(`Error sending email for payment ${payment.id}:`, emailError)
+            }
+          }
+
           results.push({
             payment_id: payment.id,
             user_id: payment.user_id,
