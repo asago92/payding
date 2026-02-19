@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { DollarSign, Loader2, Mail, Lock, ArrowLeft, Chrome, ArrowRight } from "lucide-react";
+import { DollarSign, Loader2, Mail, Lock, ArrowLeft, Chrome, ArrowRight, AlertTriangle } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { lovable } from "@/integrations/lovable";
 import { toast } from "sonner";
@@ -17,6 +17,7 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [resetEmailSent, setResetEmailSent] = useState(false);
+  const [signupSuccess, setSignupSuccess] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const navigate = useNavigate();
 
@@ -98,22 +99,16 @@ const Auth = () => {
           navigate("/");
         }
       } else {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/`,
-          },
+        const response = await supabase.functions.invoke('send-verification-email', {
+          body: { email, password },
         });
 
-        if (error) {
-          if (error.message.includes("already registered")) {
-            toast.error("This email is already registered. Please sign in instead.");
-          } else {
-            toast.error(error.message);
-          }
+        if (response.error) {
+          toast.error(response.error.message || "Failed to create account");
+        } else if (response.data?.error) {
+          toast.error(response.data.error);
         } else {
-          toast.success("Check your email to confirm your account!");
+          setSignupSuccess(true);
         }
       }
     } catch (error: any) {
@@ -122,6 +117,58 @@ const Auth = () => {
 
     setIsLoading(false);
   };
+
+  // Signup Success View
+  if (signupSuccess) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-pulse-glow" />
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/20 rounded-full blur-3xl" />
+        </div>
+
+        <div className="relative z-10 w-full max-w-md">
+          <div className="flex items-center gap-2 mb-8">
+            <div className="w-10 h-10 rounded-lg gradient-hero flex items-center justify-center">
+              <DollarSign className="w-6 h-6 text-primary-foreground" />
+            </div>
+            <span className="font-bold text-2xl">Payding</span>
+          </div>
+
+          <div className="bg-card rounded-2xl border border-border shadow-soft p-8">
+            <div className="text-center">
+              <Mail className="w-16 h-16 text-primary mx-auto mb-4" />
+              <h1 className="text-2xl font-bold mb-2">Check your email</h1>
+              <p className="text-muted-foreground mb-4">
+                We've sent a verification link to <strong>{email}</strong>
+              </p>
+              <p className="text-muted-foreground text-sm mb-6">
+                Click the link in the email to activate your account and get started.
+              </p>
+
+              <div className="flex items-start gap-3 bg-yellow-50 dark:bg-yellow-950/30 border border-yellow-200 dark:border-yellow-800 rounded-xl p-4 mb-6 text-left">
+                <AlertTriangle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mt-0.5 flex-shrink-0" />
+                <p className="text-sm text-yellow-800 dark:text-yellow-300">
+                  Don't see the email? <strong>Check your spam or junk folder.</strong> The email is from <strong>welcome@contact.payding.xyz</strong>.
+                </p>
+              </div>
+
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSignupSuccess(false);
+                  setIsLogin(true);
+                }}
+                className="w-full"
+              >
+                Back to sign in
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Forgot Password View
   if (isForgotPassword) {
