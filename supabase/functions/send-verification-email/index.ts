@@ -112,7 +112,7 @@ Deno.serve(async (req) => {
       const testEmail = body.email
       if (!testEmail) throw new Error('No email provided for test')
 
-      const dummyUrl = 'https://payding.lovable.app/?confirmed=true'
+      const dummyUrl = 'https://www.payding.xyz/?confirmed=true'
       const resendResponse = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
@@ -153,7 +153,7 @@ Deno.serve(async (req) => {
       email,
       password,
       options: {
-        redirectTo: 'https://payding.lovable.app/',
+        redirectTo: 'https://www.payding.xyz/',
       },
     })
 

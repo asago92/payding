@@ -8,7 +8,7 @@ interface SeoProps {
   publishedDate?: string;
 }
 
-const BASE_URL = "https://payding.lovable.app";
+const BASE_URL = "https://www.payding.xyz";
 
 const useSeo = ({ title, description, path, type = "website", publishedDate }: SeoProps) => {
   useEffect(() => {
