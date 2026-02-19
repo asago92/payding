@@ -16,6 +16,17 @@ interface ExchangeRateResponse {
   date: string
 }
 
+function escapeHtml(text: string): string {
+  const map: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  return text.replace(/[&<>"']/g, (m) => map[m]);
+}
+
 Deno.serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -194,7 +205,7 @@ Deno.serve(async (req) => {
                     body: JSON.stringify({
                       from: 'Payding <alerts@contact.payding.xyz>',
                       to: [profile.email],
-                      subject: `${arrow} ${payment.payment_currency}/${payment.local_currency} ${direction} ${Math.abs(percentChange).toFixed(2)}% — ${payment.payment_source}`,
+                      subject: `${arrow} ${escapeHtml(payment.payment_currency)}/${escapeHtml(payment.local_currency)} ${direction} ${Math.abs(percentChange).toFixed(2)}% — ${escapeHtml(payment.payment_source)}`,
                       html: `
 <!DOCTYPE html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
@@ -224,7 +235,7 @@ Deno.serve(async (req) => {
 <!-- Payment Info -->
 <tr><td style="padding:24px 32px 0;">
   <p style="margin:0 0 4px;color:#6b7280;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:0.5px;">Payment</p>
-  <p style="margin:0;color:#111827;font-size:17px;font-weight:600;">${payment.payment_currency} ${Number(payment.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })} from ${payment.payment_source}</p>
+  <p style="margin:0;color:#111827;font-size:17px;font-weight:600;">${escapeHtml(payment.payment_currency)} ${Number(payment.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })} from ${escapeHtml(payment.payment_source)}</p>
 </td></tr>
 
 <!-- Rate Comparison -->
@@ -234,12 +245,12 @@ Deno.serve(async (req) => {
       <td width="50%" style="padding:16px;border-right:1px solid #e5e7eb;vertical-align:top;">
         <p style="margin:0 0 2px;color:#9ca3af;font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.4px;">At receipt</p>
         <p style="margin:0;color:#374151;font-size:15px;font-weight:600;">${rateAtReceipt.toFixed(4)}</p>
-        <p style="margin:4px 0 0;color:#6b7280;font-size:12px;">${payment.date_received}</p>
+        <p style="margin:4px 0 0;color:#6b7280;font-size:12px;">${escapeHtml(payment.date_received)}</p>
       </td>
       <td width="50%" style="padding:16px;vertical-align:top;">
         <p style="margin:0 0 2px;color:#9ca3af;font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.4px;">Current</p>
         <p style="margin:0;color:${accentColor};font-size:15px;font-weight:600;">${currentRate.toFixed(4)}</p>
-        <p style="margin:4px 0 0;color:#6b7280;font-size:12px;">1 ${payment.payment_currency} → ${payment.local_currency}</p>
+        <p style="margin:4px 0 0;color:#6b7280;font-size:12px;">1 ${escapeHtml(payment.payment_currency)} → ${escapeHtml(payment.local_currency)}</p>
       </td>
     </tr>
   </table>
@@ -249,21 +260,21 @@ Deno.serve(async (req) => {
 <tr><td style="padding:20px 32px 0;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9fafb;border-radius:12px;">
     <tr><td style="padding:16px;">
-      <p style="margin:0 0 10px;color:#9ca3af;font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.4px;">Local currency equivalent (${payment.local_currency})</p>
+      <p style="margin:0 0 10px;color:#9ca3af;font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.4px;">Local currency equivalent (${escapeHtml(payment.local_currency)})</p>
       <table width="100%" cellpadding="0" cellspacing="0">
         <tr>
           <td style="color:#6b7280;font-size:13px;">At receipt</td>
-          <td align="right" style="color:#374151;font-size:13px;font-weight:600;">${payment.local_currency} ${Number(localAmountAtReceipt).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+          <td align="right" style="color:#374151;font-size:13px;font-weight:600;">${escapeHtml(payment.local_currency)} ${Number(localAmountAtReceipt).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
         </tr>
         <tr><td colspan="2" style="padding:6px 0;"><div style="border-top:1px solid #e5e7eb;"></div></td></tr>
         <tr>
           <td style="color:#6b7280;font-size:13px;">Today</td>
-          <td align="right" style="color:#374151;font-size:13px;font-weight:600;">${payment.local_currency} ${Number(localAmountNow).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+          <td align="right" style="color:#374151;font-size:13px;font-weight:600;">${escapeHtml(payment.local_currency)} ${Number(localAmountNow).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
         </tr>
         <tr><td colspan="2" style="padding:6px 0;"><div style="border-top:1px solid #e5e7eb;"></div></td></tr>
         <tr>
           <td style="color:${accentColor};font-size:13px;font-weight:600;">Difference</td>
-          <td align="right" style="color:${accentColor};font-size:13px;font-weight:700;">${isPositive ? '+' : ''}${payment.local_currency} ${Number(localDifference).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+          <td align="right" style="color:${accentColor};font-size:13px;font-weight:700;">${isPositive ? '+' : ''}${escapeHtml(payment.local_currency)} ${Number(localDifference).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
         </tr>
       </table>
     </td></tr>
@@ -273,7 +284,7 @@ Deno.serve(async (req) => {
 <!-- Footer -->
 <tr><td style="padding:28px 32px;text-align:center;">
   <p style="margin:0;color:#9ca3af;font-size:11px;line-height:1.6;">
-    You're receiving this because you set up a ${payment.notification_type} alert on Payding.<br/>
+    You're receiving this because you set up a ${escapeHtml(payment.notification_type)} alert on Payding.<br/>
     <a href="${Deno.env.get('SUPABASE_URL')}/functions/v1/unsubscribe?id=${payment.id}" style="color:#6b7280;text-decoration:underline;">Unsubscribe from this alert</a><br/>
     © ${new Date().getFullYear()} Payding · All rights reserved
   </p>
