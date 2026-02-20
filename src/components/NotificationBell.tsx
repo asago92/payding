@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Bell } from "lucide-react";
+import { Bell, X, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Popover,
@@ -74,6 +74,18 @@ const NotificationBell = () => {
     );
   };
 
+  const deleteNotification = async (id: string) => {
+    await supabase.from("notifications").delete().eq("id", id);
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+  };
+
+  const clearAll = async () => {
+    if (notifications.length === 0) return;
+    const ids = notifications.map((n) => n.id);
+    await supabase.from("notifications").delete().in("id", ids);
+    setNotifications([]);
+  };
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -89,14 +101,25 @@ const NotificationBell = () => {
       <PopoverContent className="w-80 p-0" align="end">
         <div className="flex items-center justify-between px-4 py-3 border-b border-border">
           <h4 className="font-semibold text-sm">Notifications</h4>
-          {unreadCount > 0 && (
-            <button
-              onClick={markAllRead}
-              className="text-xs text-primary hover:underline"
-            >
-              Mark all read
-            </button>
-          )}
+          <div className="flex items-center gap-3">
+            {unreadCount > 0 && (
+              <button
+                onClick={markAllRead}
+                className="text-xs text-primary hover:underline"
+              >
+                Mark all read
+              </button>
+            )}
+            {notifications.length > 0 && (
+              <button
+                onClick={clearAll}
+                className="text-xs text-destructive hover:underline flex items-center gap-1"
+              >
+                <Trash2 className="w-3 h-3" />
+                Clear all
+              </button>
+            )}
+          </div>
         </div>
         <ScrollArea className="max-h-80">
           {notifications.length === 0 ? (
@@ -105,30 +128,38 @@ const NotificationBell = () => {
             </div>
           ) : (
             notifications.map((n) => (
-              <button
+              <div
                 key={n.id}
-                onClick={() => markRead(n.id)}
-                className={`w-full text-left px-4 py-3 border-b border-border last:border-b-0 transition-colors hover:bg-secondary/50 ${
+                className={`relative w-full text-left px-4 py-3 border-b border-border last:border-b-0 transition-colors hover:bg-secondary/50 group ${
                   !n.is_read ? "bg-primary/5" : ""
                 }`}
               >
-                <div className="flex items-start gap-2">
-                  {!n.is_read && (
-                    <span className="w-2 h-2 rounded-full bg-primary mt-1.5 shrink-0" />
-                  )}
-                  <div className={!n.is_read ? "" : "ml-4"}>
-                    <p className="text-sm font-medium leading-tight">{n.title}</p>
-                    <p className="text-xs text-muted-foreground mt-1 leading-snug">
-                      {n.message}
-                    </p>
-                    <p className="text-[10px] text-muted-foreground/70 mt-1">
-                      {formatDistanceToNow(new Date(n.created_at), {
-                        addSuffix: true,
-                      })}
-                    </p>
+                <button
+                  onClick={() => deleteNotification(n.id)}
+                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
+                  aria-label="Delete notification"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+                <button onClick={() => markRead(n.id)} className="w-full text-left">
+                  <div className="flex items-start gap-2 pr-5">
+                    {!n.is_read && (
+                      <span className="w-2 h-2 rounded-full bg-primary mt-1.5 shrink-0" />
+                    )}
+                    <div className={!n.is_read ? "" : "ml-4"}>
+                      <p className="text-sm font-medium leading-tight">{n.title}</p>
+                      <p className="text-xs text-muted-foreground mt-1 leading-snug">
+                        {n.message}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground/70 mt-1">
+                        {formatDistanceToNow(new Date(n.created_at), {
+                          addSuffix: true,
+                        })}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </button>
+                </button>
+              </div>
             ))
           )}
         </ScrollArea>
