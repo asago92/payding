@@ -169,6 +169,28 @@ Deno.serve(async (req) => {
             payment.notification_type === 'daily' ||
             (payment.notification_type === 'threshold' && percentChange >= (payment.threshold || 0))
 
+          // Send in-app notification if needed
+          if (shouldNotify && payment.notification_method === 'push') {
+            try {
+              const direction = percentChange >= 0 ? 'improved' : 'dropped'
+              const arrow = percentChange >= 0 ? '↑' : '↓'
+              await supabase
+                .from('notifications')
+                .insert({
+                  user_id: payment.user_id,
+                  payment_id: payment.id,
+                  title: `${arrow} ${payment.payment_currency}/${payment.local_currency} ${direction} ${Math.abs(percentChange).toFixed(2)}%`,
+                  message: `Your ${payment.payment_currency} ${Number(payment.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })} from ${payment.payment_source} — rate went from ${rateAtReceipt.toFixed(4)} to ${currentRate.toFixed(4)}.`,
+                  percent_change: percentChange,
+                  payment_currency: payment.payment_currency,
+                  local_currency: payment.local_currency,
+                })
+              console.log(`In-app notification created for payment ${payment.id}`)
+            } catch (pushError) {
+              console.error(`Error creating in-app notification for payment ${payment.id}:`, pushError)
+            }
+          }
+
           // Send email if needed
           if (shouldNotify && payment.notification_method === 'email') {
             try {

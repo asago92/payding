@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { DollarSign, LogOut, User, Menu, X } from "lucide-react";
+import NotificationBell from "@/components/NotificationBell";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -112,6 +113,7 @@ const Header = () => {
                     <User className="w-4 h-4" />
                     <span className="max-w-[150px] truncate">{user.email}</span>
                   </div>
+                  <NotificationBell />
                   <Button variant="outline" size="sm" onClick={handleSignOut}>
                     <LogOut className="w-4 h-4" />
                     <span className="ml-2">Sign Out</span>
@@ -167,9 +169,12 @@ const Header = () => {
 
             {user ? (
               <div className="space-y-3 px-4">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <User className="w-4 h-4" />
-                  <span className="truncate">{user.email}</span>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <User className="w-4 h-4" />
+                    <span className="truncate">{user.email}</span>
+                  </div>
+                  <NotificationBell />
                 </div>
                 <Button variant="outline" className="w-full" onClick={() => { handleSignOut(); setMobileMenuOpen(false); }}>
                   <LogOut className="w-4 h-4 mr-2" />
