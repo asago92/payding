@@ -109,10 +109,9 @@ const Header = () => {
             <div className="hidden md:flex">
               {user ? (
                 <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <User className="w-4 h-4" />
-                    <span className="max-w-[150px] truncate">{user.email}</span>
-                  </div>
+                  <Button variant="outline" size="sm" onClick={() => navigate("/dashboard")}>
+                    Dashboard
+                  </Button>
                   <NotificationBell />
                   <Button variant="outline" size="sm" onClick={handleSignOut}>
                     <LogOut className="w-4 h-4" />
@@ -176,6 +175,9 @@ const Header = () => {
                   </div>
                   <NotificationBell />
                 </div>
+                <Button variant="default" className="w-full" onClick={() => { navigate("/dashboard"); setMobileMenuOpen(false); }}>
+                  Dashboard
+                </Button>
                 <Button variant="outline" className="w-full" onClick={() => { handleSignOut(); setMobileMenuOpen(false); }}>
                   <LogOut className="w-4 h-4 mr-2" />
                   Sign Out
