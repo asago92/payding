@@ -86,6 +86,8 @@ function buildVerificationHtml(confirmUrl: string): string {
 <tr><td style="padding:28px 32px;text-align:center;">
   <p style="margin:0;color:#9ca3af;font-size:11px;line-height:1.6;">
     This link expires in 24 hours.<br/>
+    You're receiving this because you signed up for Payding.<br/>
+    <a href="https://www.payding.xyz" style="color:#6b7280;text-decoration:underline;">Visit Payding</a><br/>
     © ${year} Payding · All rights reserved
   </p>
 </td></tr>
