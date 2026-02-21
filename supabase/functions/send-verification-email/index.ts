@@ -153,7 +153,7 @@ Deno.serve(async (req) => {
       email,
       password,
       options: {
-        redirectTo: 'https://www.payding.xyz/',
+        redirectTo: 'https://www.payding.xyz',
       },
     })
 
@@ -168,8 +168,18 @@ Deno.serve(async (req) => {
       throw linkError
     }
 
-    const confirmUrl = linkData.properties?.action_link
+    let confirmUrl = linkData.properties?.action_link
     if (!confirmUrl) throw new Error('Failed to generate confirmation link')
+
+    // Ensure the redirect points to the custom domain
+    const targetRedirect = 'https://www.payding.xyz'
+    try {
+      const url = new URL(confirmUrl)
+      url.searchParams.set('redirect_to', targetRedirect)
+      confirmUrl = url.toString()
+    } catch {
+      // If URL parsing fails, use the original link
+    }
 
     // Send branded verification email via Resend
     const resendResponse = await fetch('https://api.resend.com/emails', {
