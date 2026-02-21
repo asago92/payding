@@ -12,6 +12,7 @@ import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
+import Unsubscribe from "./pages/Unsubscribe";
 import NotFound from "./pages/NotFound";
 import { useWelcomeEmail } from "./hooks/use-welcome-email";
 
@@ -30,6 +31,7 @@ const AppContent = () => {
       <Route path="/blog/:slug" element={<BlogPost />} />
       <Route path="/terms" element={<Terms />} />
       <Route path="/privacy" element={<Privacy />} />
+      <Route path="/unsubscribe" element={<Unsubscribe />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

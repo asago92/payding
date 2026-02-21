@@ -307,7 +307,7 @@ Deno.serve(async (req) => {
 <tr><td style="padding:28px 32px;text-align:center;">
   <p style="margin:0;color:#9ca3af;font-size:11px;line-height:1.6;">
     You're receiving this because you set up a ${escapeHtml(payment.notification_type)} alert on Payding.<br/>
-    <a href="${Deno.env.get('SUPABASE_URL')}/functions/v1/unsubscribe?id=${payment.id}" style="color:#6b7280;text-decoration:underline;">Unsubscribe from this alert</a><br/>
+    <a href="https://www.payding.xyz/unsubscribe?id=${payment.id}" style="color:#6b7280;text-decoration:underline;">Unsubscribe from this alert</a><br/>
     © ${new Date().getFullYear()} Payding · All rights reserved
   </p>
 </td></tr>
