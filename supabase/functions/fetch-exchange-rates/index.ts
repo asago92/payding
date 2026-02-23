@@ -381,19 +381,22 @@ Deno.serve(async (req) => {
         notification_type: 'daily',
       }
       const rateAtReceipt = 83.2500
-      const currentRate = 84.7800
+      const currentRate = 83.2500
       const percentChange = ((currentRate - rateAtReceipt) / rateAtReceipt) * 100
-      const isPositive = percentChange >= 0
-      const direction = isPositive ? 'improved' : 'dropped'
-      const actionText = isPositive 
-        ? "The rate has improved — now might be a good time to convert." 
-        : "The rate has dipped. You may want to hold off for now."
+      const isNeutral = Math.abs(percentChange) < 0.01
+      const isPositive = !isNeutral && percentChange >= 0
+      const direction = isNeutral ? 'holding steady' : (isPositive ? 'improved' : 'dropped')
+      const actionText = isNeutral
+        ? "The rate is holding steady — no significant change since receipt."
+        : isPositive 
+          ? "The rate has improved — now might be a good time to convert." 
+          : "The rate has dipped. You may want to hold off for now."
       const localAmountAtReceipt = (mock.amount * rateAtReceipt).toFixed(2)
       const localAmountNow = (mock.amount * currentRate).toFixed(2)
       const localDifference = (mock.amount * currentRate - mock.amount * rateAtReceipt).toFixed(2)
-      const accentColor = isPositive ? '#059669' : '#dc2626'
-      const accentBg = isPositive ? '#ecfdf5' : '#fef2f2'
-      const arrow = isPositive ? '↑' : '↓'
+      const accentColor = isNeutral ? '#6b7280' : (isPositive ? '#059669' : '#dc2626')
+      const accentBg = isNeutral ? '#f3f4f6' : (isPositive ? '#ecfdf5' : '#fef2f2')
+      const arrow = isNeutral ? '→' : (isPositive ? '↑' : '↓')
 
       const resendResponse = await fetch('https://api.resend.com/emails', {
         method: 'POST',
@@ -401,7 +404,9 @@ Deno.serve(async (req) => {
         body: JSON.stringify({
           from: 'Payding <alerts@contact.payding.xyz>',
           to: [testEmail],
-          subject: `${arrow} ${mock.payment_currency}/${mock.local_currency} ${direction} ${Math.abs(percentChange).toFixed(2)}% — ${mock.payment_source}`,
+          subject: isNeutral
+            ? `${arrow} ${mock.payment_currency}/${mock.local_currency} holding steady — ${mock.payment_source}`
+            : `${arrow} ${mock.payment_currency}/${mock.local_currency} ${direction} ${Math.abs(percentChange).toFixed(2)}% — ${mock.payment_source}`,
           html: `
 <!DOCTYPE html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
@@ -418,7 +423,7 @@ Deno.serve(async (req) => {
 <tr><td style="padding:28px 32px 0;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:${accentBg};border-radius:12px;">
     <tr><td style="padding:20px;text-align:center;">
-      <span style="font-size:32px;font-weight:700;color:${accentColor};letter-spacing:-1px;">${isPositive ? '+' : ''}${percentChange.toFixed(2)}%</span>
+      <span style="font-size:32px;font-weight:700;color:${accentColor};letter-spacing:-1px;">${isNeutral ? '0.00%' : (isPositive ? '+' : '') + percentChange.toFixed(2) + '%'}</span>
       <p style="margin:6px 0 0;color:${accentColor};font-size:13px;font-weight:500;">${actionText}</p>
     </td></tr>
   </table>
@@ -460,7 +465,7 @@ Deno.serve(async (req) => {
         <tr><td colspan="2" style="padding:6px 0;"><div style="border-top:1px solid #e5e7eb;"></div></td></tr>
         <tr>
           <td style="color:${accentColor};font-size:13px;font-weight:600;">Difference</td>
-          <td align="right" style="color:${accentColor};font-size:13px;font-weight:700;">${isPositive ? '+' : ''}${mock.local_currency} ${Number(localDifference).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+          <td align="right" style="color:${accentColor};font-size:13px;font-weight:700;">${isNeutral ? 'No change' : (isPositive ? '+' : '') + mock.local_currency + ' ' + Number(localDifference).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
         </tr>
       </table>
     </td></tr>
