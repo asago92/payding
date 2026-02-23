@@ -30,6 +30,16 @@ import {
 } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 
+const WISE_AFFILIATE_LINKS: Record<string, string> = {
+  USD: "https://wise.prf.hn/l/gx2xPje/",
+  GBP: "https://wise.prf.hn/l/jXMX8y9/",
+  AUD: "https://wise.prf.hn/l/p3oLkXe/",
+  EUR: "https://wise.prf.hn/l/PlbGoRP/",
+  JPY: "https://wise.prf.hn/l/xE1kXyP/",
+};
+
+const DEFAULT_WISE_LINK = "https://wise.com/invite/dic/a48d710";
+
 interface Payment {
   id: string;
   amount: number;
@@ -316,7 +326,7 @@ const Dashboard = () => {
                               className="text-xs h-8 gap-1.5"
                               onClick={() =>
                                 window.open(
-                                  "https://wise.com/invite/dic/a48d710",
+                                  WISE_AFFILIATE_LINKS[p.payment_currency] || DEFAULT_WISE_LINK,
                                   "_blank",
                                   "noopener,noreferrer"
                                 )
