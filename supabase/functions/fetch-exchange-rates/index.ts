@@ -172,14 +172,17 @@ Deno.serve(async (req) => {
           // Send in-app notification if needed
           if (shouldNotify && payment.notification_method === 'push') {
             try {
-              const direction = percentChange >= 0 ? 'improved' : 'dropped'
-              const arrow = percentChange >= 0 ? '↑' : '↓'
+              const isNeutralPush = Math.abs(percentChange) < 0.01
+              const direction = isNeutralPush ? 'holding steady' : (percentChange >= 0 ? 'improved' : 'dropped')
+              const arrow = isNeutralPush ? '→' : (percentChange >= 0 ? '↑' : '↓')
               await supabase
                 .from('notifications')
                 .insert({
                   user_id: payment.user_id,
                   payment_id: payment.id,
-                  title: `${arrow} ${payment.payment_currency}/${payment.local_currency} ${direction} ${Math.abs(percentChange).toFixed(2)}%`,
+                  title: isNeutralPush
+                    ? `${arrow} ${payment.payment_currency}/${payment.local_currency} holding steady`
+                    : `${arrow} ${payment.payment_currency}/${payment.local_currency} ${direction} ${Math.abs(percentChange).toFixed(2)}%`,
                   message: `Your ${payment.payment_currency} ${Number(payment.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })} from ${payment.payment_source} — rate went from ${rateAtReceipt.toFixed(4)} to ${currentRate.toFixed(4)}.`,
                   percent_change: percentChange,
                   payment_currency: payment.payment_currency,
@@ -204,19 +207,23 @@ Deno.serve(async (req) => {
               if (profile?.email) {
                 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
                 if (RESEND_API_KEY) {
-                  const direction = percentChange >= 0 ? 'improved' : 'dropped'
-                  const isPositive = percentChange >= 0
-                  const actionText = isPositive 
-                    ? "The rate has improved — now might be a good time to convert." 
-                    : "The rate has dipped. You may want to hold off for now."
+                  const isNeutral = Math.abs(percentChange) < 0.01
+                  const isPositive = !isNeutral && percentChange >= 0
+                  const isNegative = !isNeutral && percentChange < 0
+                  const direction = isNeutral ? 'holding steady' : (isPositive ? 'improved' : 'dropped')
+                  const actionText = isNeutral
+                    ? "The rate is holding steady — no significant change since receipt."
+                    : isPositive 
+                      ? "The rate has improved — now might be a good time to convert." 
+                      : "The rate has dipped. You may want to hold off for now."
                   
                   // Calculate local currency equivalents
                   const localAmountAtReceipt = (payment.amount * rateAtReceipt).toFixed(2)
                   const localAmountNow = (payment.amount * currentRate).toFixed(2)
                   const localDifference = (payment.amount * currentRate - payment.amount * rateAtReceipt).toFixed(2)
-                  const accentColor = isPositive ? '#059669' : '#dc2626'
-                  const accentBg = isPositive ? '#ecfdf5' : '#fef2f2'
-                  const arrow = isPositive ? '↑' : '↓'
+                  const accentColor = isNeutral ? '#6b7280' : (isPositive ? '#059669' : '#dc2626')
+                  const accentBg = isNeutral ? '#f3f4f6' : (isPositive ? '#ecfdf5' : '#fef2f2')
+                  const arrow = isNeutral ? '→' : (isPositive ? '↑' : '↓')
 
                   const resendResponse = await fetch('https://api.resend.com/emails', {
                     method: 'POST',
@@ -227,7 +234,9 @@ Deno.serve(async (req) => {
                     body: JSON.stringify({
                       from: 'Payding <alerts@contact.payding.xyz>',
                       to: [profile.email],
-                      subject: `${arrow} ${escapeHtml(payment.payment_currency)}/${escapeHtml(payment.local_currency)} ${direction} ${Math.abs(percentChange).toFixed(2)}% — ${escapeHtml(payment.payment_source)}`,
+                      subject: isNeutral
+                        ? `${arrow} ${escapeHtml(payment.payment_currency)}/${escapeHtml(payment.local_currency)} holding steady — ${escapeHtml(payment.payment_source)}`
+                        : `${arrow} ${escapeHtml(payment.payment_currency)}/${escapeHtml(payment.local_currency)} ${direction} ${Math.abs(percentChange).toFixed(2)}% — ${escapeHtml(payment.payment_source)}`,
                       html: `
 <!DOCTYPE html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
@@ -248,7 +257,7 @@ Deno.serve(async (req) => {
 <tr><td style="padding:28px 32px 0;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:${accentBg};border-radius:12px;">
     <tr><td style="padding:20px;text-align:center;">
-      <span style="font-size:32px;font-weight:700;color:${accentColor};letter-spacing:-1px;">${isPositive ? '+' : ''}${percentChange.toFixed(2)}%</span>
+       <span style="font-size:32px;font-weight:700;color:${accentColor};letter-spacing:-1px;">${isNeutral ? '0.00%' : (isPositive ? '+' : '') + percentChange.toFixed(2) + '%'}</span>
       <p style="margin:6px 0 0;color:${accentColor};font-size:13px;font-weight:500;">${actionText}</p>
     </td></tr>
   </table>
@@ -296,7 +305,7 @@ Deno.serve(async (req) => {
         <tr><td colspan="2" style="padding:6px 0;"><div style="border-top:1px solid #e5e7eb;"></div></td></tr>
         <tr>
           <td style="color:${accentColor};font-size:13px;font-weight:600;">Difference</td>
-          <td align="right" style="color:${accentColor};font-size:13px;font-weight:700;">${isPositive ? '+' : ''}${escapeHtml(payment.local_currency)} ${Number(localDifference).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+          <td align="right" style="color:${accentColor};font-size:13px;font-weight:700;">${isNeutral ? 'No change' : (isPositive ? '+' : '') + escapeHtml(payment.local_currency) + ' ' + Number(localDifference).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
         </tr>
       </table>
     </td></tr>
