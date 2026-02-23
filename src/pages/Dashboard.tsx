@@ -19,7 +19,15 @@ import {
   TrendingDown,
   Mail,
   Smartphone,
+  ExternalLink,
+  Info,
 } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { toast } from "sonner";
 
 interface Payment {
@@ -282,21 +290,53 @@ const Dashboard = () => {
                             </div>
                           )}
 
-                          <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
-                            {p.notification_method === "email" ? (
-                              <Mail className="w-3 h-3" />
-                            ) : (
-                              <Smartphone className="w-3 h-3" />
-                            )}
-                            {p.notification_type === "daily"
-                              ? "Daily alerts"
-                              : `Alert at +${p.threshold}%`}
-                            <span className="ml-auto">
-                              <span className="inline-flex items-center gap-1 text-primary">
-                                <Check className="w-3 h-3" />
-                                Active
+                          <div className="mt-3 flex items-center justify-between">
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              {p.notification_method === "email" ? (
+                                <Mail className="w-3 h-3" />
+                              ) : (
+                                <Smartphone className="w-3 h-3" />
+                              )}
+                              {p.notification_type === "daily"
+                                ? "Daily alerts"
+                                : `Alert at +${p.threshold}%`}
+                              <span className="ml-auto">
+                                <span className="inline-flex items-center gap-1 text-primary">
+                                  <Check className="w-3 h-3" />
+                                  Active
+                                </span>
                               </span>
-                            </span>
+                            </div>
+                          </div>
+
+                          <div className="mt-3 flex items-center gap-1.5">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-xs h-8 gap-1.5"
+                              onClick={() =>
+                                window.open(
+                                  "https://wise.com/invite/dic/a48d710",
+                                  "_blank",
+                                  "noopener,noreferrer"
+                                )
+                              }
+                            >
+                              Cash out via Wise
+                              <ExternalLink className="w-3 h-3" />
+                            </Button>
+                            <TooltipProvider delayDuration={200}>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="cursor-help text-muted-foreground hover:text-foreground transition-colors">
+                                    <Info className="w-3.5 h-3.5" />
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="max-w-[240px] text-xs leading-relaxed">
+                                  This is an affiliate link. If you use Wise through us, we may earn a small commission which helps keep this tool free for you! 🙏
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           </div>
                         </div>
                       );
