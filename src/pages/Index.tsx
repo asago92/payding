@@ -11,17 +11,49 @@ import useSeo from "@/hooks/use-seo";
 
 const Index = () => {
   const navigate = useNavigate();
+  const [checkingSession, setCheckingSession] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) navigate("/dashboard");
+    let mounted = true;
+
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!mounted) return;
+
+      if (session) {
+        navigate("/dashboard", { replace: true });
+      } else {
+        setCheckingSession(false);
+      }
+    };
+
+    checkSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        navigate("/dashboard", { replace: true });
+      } else if (mounted) {
+        setCheckingSession(false);
+      }
     });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, [navigate]);
+
   useSeo({
     title: "Smart Currency Alerts for Global Earners",
     description: "Stop losing money on bad exchange rates. Payding notifies you when it's the right time to convert your foreign payments.",
     path: "/",
   });
+
+  if (checkingSession) {
+    return <div className="min-h-screen bg-background" />;
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
