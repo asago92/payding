@@ -15,7 +15,11 @@ const Unsubscribe = () => {
     const doUnsubscribe = async () => {
       try {
         const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/unsubscribe?id=${paymentId}`;
-        const res = await fetch(url);
+        const res = await fetch(url, {
+          headers: {
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+        });
         setStatus(res.ok ? "success" : "error");
       } catch {
         setStatus("error");
