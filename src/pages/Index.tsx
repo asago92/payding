@@ -1,3 +1,6 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import HowItWorks from "@/components/HowItWorks";
@@ -7,6 +10,13 @@ import Footer from "@/components/Footer";
 import useSeo from "@/hooks/use-seo";
 
 const Index = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) navigate("/dashboard");
+    });
+  }, [navigate]);
   useSeo({
     title: "Smart Currency Alerts for Global Earners",
     description: "Stop losing money on bad exchange rates. Payding notifies you when it's the right time to convert your foreign payments.",
