@@ -1,13 +1,22 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
 Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders })
+  }
+
   const url = new URL(req.url)
   const paymentId = url.searchParams.get('id')
 
   if (!paymentId) {
-    return new Response('<html><body><h1>Invalid link</h1><p>This unsubscribe link is not valid.</p></body></html>', {
+    return new Response(JSON.stringify({ error: 'Invalid link' }), {
       status: 400,
-      headers: { 'Content-Type': 'text/html' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   }
 
@@ -23,32 +32,21 @@ Deno.serve(async (req) => {
 
     if (error) {
       console.error('Unsubscribe error:', error)
-      return new Response(`<html><body style="font-family:sans-serif;text-align:center;padding:60px 20px;">
-        <h1 style="color:#dc2626;">Something went wrong</h1>
-        <p>We couldn't process your unsubscribe request. Please try again later.</p>
-      </body></html>`, {
+      return new Response(JSON.stringify({ error: 'Failed to unsubscribe' }), {
         status: 500,
-        headers: { 'Content-Type': 'text/html' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    return new Response(`<html><body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;text-align:center;padding:60px 20px;background:#f4f4f7;">
-      <div style="max-width:480px;margin:0 auto;background:#fff;border-radius:16px;padding:40px;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
-        <div style="width:48px;height:48px;background:linear-gradient(135deg,#4f46e5,#7c3aed);border-radius:12px;margin:0 auto 20px;display:flex;align-items:center;justify-content:center;">
-          <span style="color:#fff;font-size:22px;font-weight:700;line-height:48px;">P</span>
-        </div>
-        <h1 style="color:#111827;font-size:22px;margin:0 0 8px;">Unsubscribed</h1>
-        <p style="color:#6b7280;font-size:15px;line-height:1.6;">You've been unsubscribed from exchange rate alerts for this payment. You can re-enable tracking anytime from your dashboard.</p>
-      </div>
-    </body></html>`, {
+    return new Response(JSON.stringify({ success: true }), {
       status: 200,
-      headers: { 'Content-Type': 'text/html' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   } catch (err) {
     console.error('Unsubscribe error:', err)
-    return new Response('<html><body><h1>Error</h1></body></html>', {
+    return new Response(JSON.stringify({ error: 'Internal error' }), {
       status: 500,
-      headers: { 'Content-Type': 'text/html' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   }
 })
