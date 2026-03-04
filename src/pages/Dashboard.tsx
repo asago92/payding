@@ -79,6 +79,8 @@ const Dashboard = () => {
   const [fetchingPayments, setFetchingPayments] = useState(true);
 
   // Account settings
+  const [profileName, setProfileName] = useState("");
+  const [savingName, setSavingName] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [updatingPassword, setUpdatingPassword] = useState(false);
@@ -99,11 +101,36 @@ const Dashboard = () => {
         navigate("/auth");
       } else {
         fetchPayments(session.user.id);
+        fetchProfile(session.user.id);
       }
     });
 
     return () => subscription.unsubscribe();
   }, [navigate]);
+
+  const fetchProfile = async (userId: string) => {
+    const { data } = await supabase
+      .from("profiles")
+      .select("name")
+      .eq("user_id", userId)
+      .single();
+    if (data?.name) setProfileName(data.name);
+  };
+
+  const handleSaveName = async () => {
+    if (!user) return;
+    setSavingName(true);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ name: profileName })
+      .eq("user_id", user.id);
+    if (error) {
+      toast.error("Failed to update name");
+    } else {
+      toast.success("Name updated");
+    }
+    setSavingName(false);
+  };
 
   const fetchPayments = async (userId: string) => {
     setFetchingPayments(true);
@@ -175,7 +202,9 @@ const Dashboard = () => {
       <main className="flex-1 pt-24 pb-16">
         <div className="container px-4 max-w-4xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold">Dashboard</h1>
+            <h1 className="text-3xl font-bold">
+              {profileName ? `Hello, ${profileName}` : "Dashboard"}
+            </h1>
             <p className="text-muted-foreground mt-1">
               Manage your payment alerts and account settings
             </p>
@@ -363,6 +392,21 @@ const Dashboard = () => {
                 <div className="bg-card rounded-2xl border border-border shadow-soft p-6">
                   <h2 className="text-xl font-semibold mb-4">Account Information</h2>
                   <div className="space-y-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="profile-name" className="text-sm text-muted-foreground">Name</Label>
+                      <div className="flex gap-2 max-w-sm">
+                        <Input
+                          id="profile-name"
+                          value={profileName}
+                          onChange={(e) => setProfileName(e.target.value)}
+                          placeholder="Your name"
+                          className="h-11"
+                        />
+                        <Button onClick={handleSaveName} disabled={savingName} size="sm" className="h-11 px-4">
+                          {savingName ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save"}
+                        </Button>
+                      </div>
+                    </div>
                     <div>
                       <Label className="text-sm text-muted-foreground">Email</Label>
                       <p className="font-medium">{user?.email}</p>
