@@ -17,10 +17,14 @@ const Index = () => {
   // Scroll to hash section when arriving from another page
   useEffect(() => {
     if (!checkingSession && location.hash) {
-      const el = document.querySelector(location.hash);
-      if (el) {
-        setTimeout(() => el.scrollIntoView({ behavior: "smooth" }), 100);
-      }
+      // Use a longer delay to ensure DOM is fully rendered
+      const timer = setTimeout(() => {
+        const el = document.querySelector(location.hash);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 500);
+      return () => clearTimeout(timer);
     }
   }, [checkingSession, location.hash]);
 
