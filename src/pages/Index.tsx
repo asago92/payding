@@ -11,7 +11,18 @@ import useSeo from "@/hooks/use-seo";
 
 const Index = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [checkingSession, setCheckingSession] = useState(true);
+
+  // Scroll to hash section when arriving from another page
+  useEffect(() => {
+    if (!checkingSession && location.hash) {
+      const el = document.querySelector(location.hash);
+      if (el) {
+        setTimeout(() => el.scrollIntoView({ behavior: "smooth" }), 100);
+      }
+    }
+  }, [checkingSession, location.hash]);
 
   useEffect(() => {
     let mounted = true;
