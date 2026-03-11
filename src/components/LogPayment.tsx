@@ -129,8 +129,9 @@ const LogPayment = () => {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [guestPayments, setGuestPayments] = useState<Payment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isFetching, setIsFetching] = useState(true);
+  const [isFetching, setIsFetching] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [authReady, setAuthReady] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   const GUEST_PAYMENTS_KEY = "payding_guest_alerts";
