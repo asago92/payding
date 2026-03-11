@@ -57,19 +57,30 @@ const Header = () => {
     }
   };
 
-  const navLinks = [
-    { href: "#how-it-works", label: "How It Works" },
-    { href: "#log-payment", label: "Log Payment" },
-    { href: "/about", label: "About Us" },
-    { href: "/blog", label: "Blog" },
-    { href: "#faq", label: "FAQ" },
-  ];
+  const navLinks = user
+    ? [
+        { href: "/dashboard", label: "Dashboard" },
+        { href: "/about", label: "About Us" },
+        { href: "/blog", label: "Blog" },
+      ]
+    : [
+        { href: "#how-it-works", label: "How It Works" },
+        { href: "#log-payment", label: "Log Payment" },
+        { href: "/about", label: "About Us" },
+        { href: "/blog", label: "Blog" },
+        { href: "#faq", label: "FAQ" },
+      ];
 
   const handleNavClick = (href: string) => {
     setMobileMenuOpen(false);
     if (href.startsWith("#")) {
-      const el = document.querySelector(href);
-      el?.scrollIntoView({ behavior: "smooth" });
+      // If we're not on the homepage, navigate there first with the hash
+      if (window.location.pathname !== "/") {
+        navigate("/" + href);
+      } else {
+        const el = document.querySelector(href);
+        el?.scrollIntoView({ behavior: "smooth" });
+      }
     } else {
       navigate(href);
     }
@@ -109,9 +120,6 @@ const Header = () => {
             <div className="hidden md:flex">
               {user ? (
                 <div className="flex items-center gap-3">
-                  <Button variant="outline" size="sm" onClick={() => navigate("/dashboard")}>
-                    Dashboard
-                  </Button>
                   <NotificationBell />
                   <Button variant="outline" size="sm" onClick={handleSignOut}>
                     <LogOut className="w-4 h-4" />
@@ -175,9 +183,6 @@ const Header = () => {
                   </div>
                   <NotificationBell />
                 </div>
-                <Button variant="default" className="w-full" onClick={() => { navigate("/dashboard"); setMobileMenuOpen(false); }}>
-                  Dashboard
-                </Button>
                 <Button variant="outline" className="w-full" onClick={() => { handleSignOut(); setMobileMenuOpen(false); }}>
                   <LogOut className="w-4 h-4 mr-2" />
                   Sign Out
