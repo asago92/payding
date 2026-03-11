@@ -200,23 +200,26 @@ const LogPayment = () => {
     // Load guest payments on mount
     loadGuestPayments();
 
-    // Check for user session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchPayments(session.user.id);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      setAuthReady(true);
+      if (currentUser) {
+        fetchPayments(currentUser.id);
       } else {
-        setIsFetching(false);
+        setPayments([]);
       }
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchPayments(session.user.id);
-      } else {
-        setPayments([]);
-        setIsFetching(false);
+    // Fallback: if onAuthStateChange hasn't fired yet
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!authReady) {
+        const currentUser = session?.user ?? null;
+        setUser(currentUser);
+        setAuthReady(true);
+        if (currentUser) {
+          fetchPayments(currentUser.id);
+        }
       }
     });
 
