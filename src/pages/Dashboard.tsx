@@ -87,21 +87,22 @@ const Dashboard = () => {
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
       setLoading(false);
-      if (!session?.user) {
+      if (!currentUser) {
         navigate("/auth");
+      } else {
+        fetchPayments(currentUser.id);
+        fetchProfile(currentUser.id);
       }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
       if (!session?.user) {
+        setUser(null);
+        setLoading(false);
         navigate("/auth");
-      } else {
-        fetchPayments(session.user.id);
-        fetchProfile(session.user.id);
       }
     });
 

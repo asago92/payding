@@ -129,8 +129,9 @@ const LogPayment = () => {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [guestPayments, setGuestPayments] = useState<Payment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isFetching, setIsFetching] = useState(true);
+  const [isFetching, setIsFetching] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [authReady, setAuthReady] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   const GUEST_PAYMENTS_KEY = "payding_guest_alerts";
@@ -199,23 +200,26 @@ const LogPayment = () => {
     // Load guest payments on mount
     loadGuestPayments();
 
-    // Check for user session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchPayments(session.user.id);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      setAuthReady(true);
+      if (currentUser) {
+        fetchPayments(currentUser.id);
       } else {
-        setIsFetching(false);
+        setPayments([]);
       }
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchPayments(session.user.id);
-      } else {
-        setPayments([]);
-        setIsFetching(false);
+    // Fallback: if onAuthStateChange hasn't fired yet
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!authReady) {
+        const currentUser = session?.user ?? null;
+        setUser(currentUser);
+        setAuthReady(true);
+        if (currentUser) {
+          fetchPayments(currentUser.id);
+        }
       }
     });
 
@@ -662,7 +666,7 @@ const LogPayment = () => {
                   Active Alerts
                 </h3>
 
-                {isFetching ? (
+                {(!authReady || isFetching) ? (
                   <div className="flex items-center justify-center py-12">
                     <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
                   </div>
