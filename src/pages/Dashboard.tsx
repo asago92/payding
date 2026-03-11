@@ -86,10 +86,14 @@ const Dashboard = () => {
   const [updatingPassword, setUpdatingPassword] = useState(false);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    let initialDone = false;
+
+    // First, restore session from storage
+    supabase.auth.getSession().then(({ data: { session } }) => {
       const currentUser = session?.user ?? null;
       setUser(currentUser);
       setLoading(false);
+      initialDone = true;
       if (!currentUser) {
         navigate("/auth");
       } else {
@@ -98,11 +102,16 @@ const Dashboard = () => {
       }
     });
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session?.user) {
-        setUser(null);
-        setLoading(false);
+    // Then listen for subsequent changes (sign-out, token refresh, etc.)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!initialDone) return; // Skip the INITIAL_SESSION event, getSession handles it
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      if (!currentUser) {
         navigate("/auth");
+      } else {
+        fetchPayments(currentUser.id);
+        fetchProfile(currentUser.id);
       }
     });
 

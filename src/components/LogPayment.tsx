@@ -197,29 +197,29 @@ const LogPayment = () => {
   };
 
   useEffect(() => {
-    // Load guest payments on mount
     loadGuestPayments();
+    let initialDone = false;
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    // Restore session from storage first
+    supabase.auth.getSession().then(({ data: { session } }) => {
       const currentUser = session?.user ?? null;
       setUser(currentUser);
       setAuthReady(true);
+      initialDone = true;
+      if (currentUser) {
+        fetchPayments(currentUser.id);
+      }
+    });
+
+    // Listen for subsequent auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!initialDone) return;
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
       if (currentUser) {
         fetchPayments(currentUser.id);
       } else {
         setPayments([]);
-      }
-    });
-
-    // Fallback: if onAuthStateChange hasn't fired yet
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!authReady) {
-        const currentUser = session?.user ?? null;
-        setUser(currentUser);
-        setAuthReady(true);
-        if (currentUser) {
-          fetchPayments(currentUser.id);
-        }
       }
     });
 
