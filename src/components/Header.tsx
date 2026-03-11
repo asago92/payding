@@ -183,9 +183,6 @@ const Header = () => {
                   </div>
                   <NotificationBell />
                 </div>
-                <Button variant="default" className="w-full" onClick={() => { navigate("/dashboard"); setMobileMenuOpen(false); }}>
-                  Dashboard
-                </Button>
                 <Button variant="outline" className="w-full" onClick={() => { handleSignOut(); setMobileMenuOpen(false); }}>
                   <LogOut className="w-4 h-4 mr-2" />
                   Sign Out
