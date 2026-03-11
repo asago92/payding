@@ -57,13 +57,19 @@ const Header = () => {
     }
   };
 
-  const navLinks = [
-    { href: "#how-it-works", label: "How It Works" },
-    { href: "#log-payment", label: "Log Payment" },
-    { href: "/about", label: "About Us" },
-    { href: "/blog", label: "Blog" },
-    { href: "#faq", label: "FAQ" },
-  ];
+  const navLinks = user
+    ? [
+        { href: "/dashboard", label: "Dashboard" },
+        { href: "/about", label: "About Us" },
+        { href: "/blog", label: "Blog" },
+      ]
+    : [
+        { href: "#how-it-works", label: "How It Works" },
+        { href: "#log-payment", label: "Log Payment" },
+        { href: "/about", label: "About Us" },
+        { href: "/blog", label: "Blog" },
+        { href: "#faq", label: "FAQ" },
+      ];
 
   const handleNavClick = (href: string) => {
     setMobileMenuOpen(false);
