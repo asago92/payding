@@ -46,7 +46,7 @@ const Index = () => {
     checkSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) {
+      if (session && !location.hash) {
         navigate("/dashboard", { replace: true });
       } else if (mounted) {
         setCheckingSession(false);
