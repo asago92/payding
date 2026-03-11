@@ -36,7 +36,7 @@ const Index = () => {
 
       if (!mounted) return;
 
-      if (session) {
+      if (session && !location.hash) {
         navigate("/dashboard", { replace: true });
       } else {
         setCheckingSession(false);
