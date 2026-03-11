@@ -120,9 +120,6 @@ const Header = () => {
             <div className="hidden md:flex">
               {user ? (
                 <div className="flex items-center gap-3">
-                  <Button variant="outline" size="sm" onClick={() => navigate("/dashboard")}>
-                    Dashboard
-                  </Button>
                   <NotificationBell />
                   <Button variant="outline" size="sm" onClick={handleSignOut}>
                     <LogOut className="w-4 h-4" />
