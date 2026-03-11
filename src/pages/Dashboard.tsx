@@ -234,10 +234,7 @@ const Dashboard = () => {
                     variant="hero"
                     size="sm"
                     onClick={() => {
-                      navigate("/");
-                      setTimeout(() => {
-                        document.querySelector("#log-payment")?.scrollIntoView({ behavior: "smooth" });
-                      }, 100);
+                      navigate("/#log-payment");
                     }}
                   >
                     + New Alert
