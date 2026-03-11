@@ -68,8 +68,13 @@ const Header = () => {
   const handleNavClick = (href: string) => {
     setMobileMenuOpen(false);
     if (href.startsWith("#")) {
-      const el = document.querySelector(href);
-      el?.scrollIntoView({ behavior: "smooth" });
+      // If we're not on the homepage, navigate there first with the hash
+      if (window.location.pathname !== "/") {
+        navigate("/" + href);
+      } else {
+        const el = document.querySelector(href);
+        el?.scrollIntoView({ behavior: "smooth" });
+      }
     } else {
       navigate(href);
     }
