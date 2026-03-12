@@ -131,8 +131,7 @@ const LogPayment = () => {
   const [guestPayments, setGuestPayments] = useState<Payment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
-  const [user, setUser] = useState<any>(null);
-  const [authReady, setAuthReady] = useState(false);
+  const { user, isReady: authReady } = useAuthReady();
   const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   const GUEST_PAYMENTS_KEY = "payding_guest_alerts";
@@ -199,33 +198,19 @@ const LogPayment = () => {
 
   useEffect(() => {
     loadGuestPayments();
-    let initialDone = false;
-
-    // Restore session from storage first
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      setAuthReady(true);
-      initialDone = true;
-      if (currentUser) {
-        fetchPayments(currentUser.id);
-      }
-    });
-
-    // Listen for subsequent auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!initialDone) return;
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      if (currentUser) {
-        fetchPayments(currentUser.id);
-      } else {
-        setPayments([]);
-      }
-    });
-
-    return () => subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!authReady) return;
+
+    if (user) {
+      fetchPayments(user.id);
+      return;
+    }
+
+    setPayments([]);
+    setIsFetching(false);
+  }, [authReady, user?.id]);
 
   const fetchPayments = async (userId: string) => {
     setIsFetching(true);
