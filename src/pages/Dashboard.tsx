@@ -123,19 +123,23 @@ const Dashboard = () => {
 
   const fetchPayments = async (userId: string) => {
     setFetchingPayments(true);
-    const { data, error } = await supabase
-      .from("payments")
-      .select("*")
-      .eq("user_id", userId)
-      .eq("is_active", true)
-      .order("created_at", { ascending: false });
 
-    if (error) {
-      toast.error("Failed to load payments");
-    } else {
-      setPayments(data || []);
+    try {
+      const { data, error } = await supabase
+        .from("payments")
+        .select("*")
+        .eq("user_id", userId)
+        .eq("is_active", true)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        toast.error("Failed to load payments");
+      } else {
+        setPayments(data || []);
+      }
+    } finally {
+      setFetchingPayments(false);
     }
-    setFetchingPayments(false);
   };
 
   const handleDeletePayment = async (paymentId: string) => {
