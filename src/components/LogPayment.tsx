@@ -10,6 +10,7 @@ import { Check, Bell, TrendingUp, Plus, Mail, Smartphone, Loader2, Trash2, Globe
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuthReady } from "@/hooks/use-auth-ready";
 
 const currencies = [
   { code: "USD", name: "US Dollar", symbol: "$" },
@@ -130,8 +131,7 @@ const LogPayment = () => {
   const [guestPayments, setGuestPayments] = useState<Payment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
-  const [user, setUser] = useState<any>(null);
-  const [authReady, setAuthReady] = useState(false);
+  const { user, isReady: authReady } = useAuthReady();
   const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   const GUEST_PAYMENTS_KEY = "payding_guest_alerts";
@@ -198,50 +198,40 @@ const LogPayment = () => {
 
   useEffect(() => {
     loadGuestPayments();
-    let initialDone = false;
-
-    // Restore session from storage first
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      setAuthReady(true);
-      initialDone = true;
-      if (currentUser) {
-        fetchPayments(currentUser.id);
-      }
-    });
-
-    // Listen for subsequent auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!initialDone) return;
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      if (currentUser) {
-        fetchPayments(currentUser.id);
-      } else {
-        setPayments([]);
-      }
-    });
-
-    return () => subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!authReady) return;
+
+    if (user) {
+      fetchPayments(user.id);
+      return;
+    }
+
+    setPayments([]);
+    setIsFetching(false);
+  }, [authReady, user?.id]);
 
   const fetchPayments = async (userId: string) => {
     setIsFetching(true);
-    const { data, error } = await supabase
-      .from('payments')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('is_active', true)
-      .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('Error fetching payments:', error);
-      toast.error('Failed to load payments');
-    } else {
-      setPayments(data || []);
+    try {
+      const { data, error } = await supabase
+        .from('payments')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching payments:', error);
+        toast.error('Failed to load payments');
+      } else {
+        setPayments(data || []);
+      }
+    } finally {
+      setIsFetching(false);
     }
-    setIsFetching(false);
   };
 
   const fetchExchangeRate = async (base: string, target: string, date?: string) => {
@@ -666,7 +656,7 @@ const LogPayment = () => {
                   Active Alerts
                 </h3>
 
-                {(!authReady || isFetching) ? (
+                {(!authReady || (user && isFetching)) ? (
                   <div className="flex items-center justify-center py-12">
                     <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
                   </div>

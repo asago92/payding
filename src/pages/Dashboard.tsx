@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuthReady } from "@/hooks/use-auth-ready";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -73,8 +74,7 @@ const sources: Record<string, string> = {
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const { user, isReady: authReady } = useAuthReady();
   const [payments, setPayments] = useState<Payment[]>([]);
   const [fetchingPayments, setFetchingPayments] = useState(true);
 
@@ -86,37 +86,16 @@ const Dashboard = () => {
   const [updatingPassword, setUpdatingPassword] = useState(false);
 
   useEffect(() => {
-    let initialDone = false;
+    if (!authReady) return;
 
-    // First, restore session from storage
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      setLoading(false);
-      initialDone = true;
-      if (!currentUser) {
-        navigate("/auth");
-      } else {
-        fetchPayments(currentUser.id);
-        fetchProfile(currentUser.id);
-      }
-    });
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
 
-    // Then listen for subsequent changes (sign-out, token refresh, etc.)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!initialDone) return; // Skip the INITIAL_SESSION event, getSession handles it
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      if (!currentUser) {
-        navigate("/auth");
-      } else {
-        fetchPayments(currentUser.id);
-        fetchProfile(currentUser.id);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
+    fetchPayments(user.id);
+    fetchProfile(user.id);
+  }, [authReady, user?.id, navigate]);
 
   const fetchProfile = async (userId: string) => {
     const { data } = await supabase
@@ -144,19 +123,23 @@ const Dashboard = () => {
 
   const fetchPayments = async (userId: string) => {
     setFetchingPayments(true);
-    const { data, error } = await supabase
-      .from("payments")
-      .select("*")
-      .eq("user_id", userId)
-      .eq("is_active", true)
-      .order("created_at", { ascending: false });
 
-    if (error) {
-      toast.error("Failed to load payments");
-    } else {
-      setPayments(data || []);
+    try {
+      const { data, error } = await supabase
+        .from("payments")
+        .select("*")
+        .eq("user_id", userId)
+        .eq("is_active", true)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        toast.error("Failed to load payments");
+      } else {
+        setPayments(data || []);
+      }
+    } finally {
+      setFetchingPayments(false);
     }
-    setFetchingPayments(false);
   };
 
   const handleDeletePayment = async (paymentId: string) => {
@@ -198,7 +181,7 @@ const Dashboard = () => {
   const sym = (code: string) => currencies[code] || code;
   const src = (id: string) => sources[id] || id;
 
-  if (loading) {
+  if (!authReady) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
