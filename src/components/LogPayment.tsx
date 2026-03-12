@@ -10,6 +10,7 @@ import { Check, Bell, TrendingUp, Plus, Mail, Smartphone, Loader2, Trash2, Globe
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuthReady } from "@/hooks/use-auth-ready";
 
 const currencies = [
   { code: "USD", name: "US Dollar", symbol: "$" },
