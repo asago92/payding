@@ -74,8 +74,7 @@ const sources: Record<string, string> = {
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const { user, isReady: authReady } = useAuthReady();
   const [payments, setPayments] = useState<Payment[]>([]);
   const [fetchingPayments, setFetchingPayments] = useState(true);
 
@@ -87,37 +86,16 @@ const Dashboard = () => {
   const [updatingPassword, setUpdatingPassword] = useState(false);
 
   useEffect(() => {
-    let initialDone = false;
+    if (!authReady) return;
 
-    // First, restore session from storage
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      setLoading(false);
-      initialDone = true;
-      if (!currentUser) {
-        navigate("/auth");
-      } else {
-        fetchPayments(currentUser.id);
-        fetchProfile(currentUser.id);
-      }
-    });
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
 
-    // Then listen for subsequent changes (sign-out, token refresh, etc.)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!initialDone) return; // Skip the INITIAL_SESSION event, getSession handles it
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      if (!currentUser) {
-        navigate("/auth");
-      } else {
-        fetchPayments(currentUser.id);
-        fetchProfile(currentUser.id);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
+    fetchPayments(user.id);
+    fetchProfile(user.id);
+  }, [authReady, user?.id, navigate]);
 
   const fetchProfile = async (userId: string) => {
     const { data } = await supabase
