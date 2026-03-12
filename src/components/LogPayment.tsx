@@ -214,20 +214,24 @@ const LogPayment = () => {
 
   const fetchPayments = async (userId: string) => {
     setIsFetching(true);
-    const { data, error } = await supabase
-      .from('payments')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('is_active', true)
-      .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('Error fetching payments:', error);
-      toast.error('Failed to load payments');
-    } else {
-      setPayments(data || []);
+    try {
+      const { data, error } = await supabase
+        .from('payments')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching payments:', error);
+        toast.error('Failed to load payments');
+      } else {
+        setPayments(data || []);
+      }
+    } finally {
+      setIsFetching(false);
     }
-    setIsFetching(false);
   };
 
   const fetchExchangeRate = async (base: string, target: string, date?: string) => {
