@@ -312,6 +312,11 @@ Deno.serve(async (req) => {
   </table>
 </td></tr>
 
+<!-- CTA Button -->
+<tr><td style="padding:24px 32px 0;text-align:center;">
+  <a href="https://www.payding.xyz/dashboard" style="display:inline-block;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;padding:14px 32px;border-radius:10px;letter-spacing:-0.2px;">Go to Dashboard</a>
+</td></tr>
+
 <!-- Footer -->
 <tr><td style="padding:28px 32px;text-align:center;">
   <p style="margin:0;color:#9ca3af;font-size:11px;line-height:1.6;">
@@ -470,6 +475,9 @@ Deno.serve(async (req) => {
       </table>
     </td></tr>
   </table>
+</td></tr>
+<tr><td style="padding:24px 32px 0;text-align:center;">
+  <a href="https://www.payding.xyz/dashboard" style="display:inline-block;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;padding:14px 32px;border-radius:10px;letter-spacing:-0.2px;">Go to Dashboard</a>
 </td></tr>
 <tr><td style="padding:28px 32px;text-align:center;">
   <p style="margin:0;color:#9ca3af;font-size:11px;line-height:1.6;">
