@@ -15,6 +15,21 @@ export function useWelcomeEmail() {
           .catch((err) => {
             console.error("Welcome email error:", err);
           });
+
+        // Trigger Zapier webhook on new signup
+        void fetch("https://hooks.zapier.com/hooks/catch/27080843/unj4mil/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          mode: "no-cors",
+          body: JSON.stringify({
+            event: "new_user_signup",
+            email: session.user.email,
+            user_id: session.user.id,
+            timestamp: new Date().toISOString(),
+          }),
+        }).catch((err) => {
+          console.error("Zapier webhook error:", err);
+        });
       }
 
       if (event === "SIGNED_OUT") {
