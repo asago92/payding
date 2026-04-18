@@ -16,8 +16,8 @@ export function useWelcomeEmail() {
             console.error("Welcome email error:", err);
           });
 
-        // Trigger Zapier webhook on new signup
-        void fetch("https://hooks.zapier.com/hooks/catch/27080843/unj4mil/", {
+        // Trigger Make webhook on new signup
+        void fetch("https://hook.eu1.make.com/3q7scxs9dcc9mdrgmo3cz7rt01ptk5ps", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           mode: "no-cors",
@@ -28,7 +28,7 @@ export function useWelcomeEmail() {
             timestamp: new Date().toISOString(),
           }),
         }).catch((err) => {
-          console.error("Zapier webhook error:", err);
+          console.error("Make webhook error:", err);
         });
       }
 
