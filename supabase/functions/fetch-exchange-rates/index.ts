@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { action, base, target, date, email } = await req.json()
+    const { action, base, target, date, email, start, end } = await req.json()
     
     console.log(`Exchange rate request: action=${action}, base=${base}, target=${target}, date=${date}`)
 
