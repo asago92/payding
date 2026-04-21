@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { DollarSign, Loader2, Mail, Lock, ArrowLeft, ArrowRight, AlertTriangle } from "lucide-react";
+import { DollarSign, Loader2, Mail, Lock, ArrowLeft, ArrowRight, AlertTriangle, User } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,6 +13,7 @@ const Auth = () => {
   const [isLogin, setIsLogin] = useState(!searchParams.get("signup"));
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [resetEmailSent, setResetEmailSent] = useState(false);
@@ -86,7 +87,7 @@ const Auth = () => {
         }
       } else {
         const response = await supabase.functions.invoke('send-verification-email', {
-          body: { email, password },
+          body: { email, password, name: name.trim() },
         });
 
         if (response.error) {
@@ -291,6 +292,25 @@ const Auth = () => {
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {!isLogin && (
+              <div className="space-y-2">
+                <Label htmlFor="name">Name</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    id="name"
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="pl-10 h-12"
+                    placeholder="Your name"
+                    maxLength={100}
+                    required
+                  />
+                </div>
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <div className="relative">

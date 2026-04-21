@@ -142,7 +142,7 @@ Deno.serve(async (req) => {
     }
 
     // Normal mode: create user and send branded verification email
-    const { email, password } = body
+    const { email, password, name } = body
     if (!email || !password) throw new Error('Email and password are required')
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
@@ -156,6 +156,7 @@ Deno.serve(async (req) => {
       password,
       options: {
         redirectTo: 'https://www.payding.xyz',
+        data: name ? { name } : undefined,
       },
     })
 
@@ -172,6 +173,21 @@ Deno.serve(async (req) => {
 
     let confirmUrl = linkData.properties?.action_link
     if (!confirmUrl) throw new Error('Failed to generate confirmation link')
+
+    // Persist name onto the profile so the dashboard greets the user.
+    const newUserId = linkData.user?.id
+    if (newUserId && name) {
+      try {
+        await supabase
+          .from('profiles')
+          .upsert(
+            { user_id: newUserId, email, name },
+            { onConflict: 'user_id' }
+          )
+      } catch (e) {
+        console.error('Failed to upsert profile name:', e)
+      }
+    }
 
     // Ensure the redirect points to the custom domain
     const targetRedirect = 'https://www.payding.xyz'
