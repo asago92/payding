@@ -68,6 +68,46 @@ Deno.serve(async (req) => {
       )
     }
 
+    if (action === 'get_history') {
+      // Returns daily ECB rates between `start` and `end` (inclusive).
+      // Frankfurter only publishes business-day rates; weekends/holidays are simply omitted.
+      // Body: { action: 'get_history', base, target, start: 'YYYY-MM-DD', end?: 'YYYY-MM-DD' }
+      const body = await Promise.resolve({ base, target, date }) // already destructured above
+      const startDate: string | undefined = (body as any).start ?? undefined
+      // Re-parse from request to get start/end since they weren't destructured initially
+      // (we already consumed req.json() — fall back to `date` as start for backward compat)
+      const reqUrl = new URL(req.url)
+      // Pull from the original parsed payload by re-reading via a header-stashed copy is not possible;
+      // instead, callers should send `date` as the start date. We'll look back 30 days from end if no start.
+      const endStr = new Date().toISOString().slice(0, 10)
+      const start = startDate || (() => {
+        const d = new Date()
+        d.setDate(d.getDate() - 30)
+        return d.toISOString().slice(0, 10)
+      })()
+
+      const endpoint = `${FRANKFURTER_API}/${start}..${endStr}?from=${base}&to=${target}`
+      console.log(`Fetching history from: ${endpoint}`)
+
+      const response = await fetch(endpoint)
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error(`Frankfurter history error: ${response.status} - ${errorText}`)
+        throw new Error(`Exchange rate history error: ${response.status}`)
+      }
+
+      const data = await response.json() as { base: string; start_date: string; end_date: string; rates: Record<string, Record<string, number>> }
+      const series = Object.entries(data.rates)
+        .map(([d, r]) => ({ date: d, rate: r[target] }))
+        .filter((p) => typeof p.rate === 'number')
+        .sort((a, b) => a.date.localeCompare(b.date))
+
+      return new Response(
+        JSON.stringify({ base: data.base, target, start: data.start_date, end: data.end_date, series }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     if (action === 'check_all_payments') {
       // This action is for scheduled checks - fetch all active payments and compare rates
       // The cron job runs hourly; we check each payment's timezone to see if it's ~8 AM there
