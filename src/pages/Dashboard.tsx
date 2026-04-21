@@ -141,8 +141,6 @@ const Dashboard = () => {
     setUpdatingPassword(false);
   };
 
-  const sym = (code: string) => currencies[code] || code;
-  const src = (id: string) => sources[id] || id;
 
   if (!authReady) {
     return (
