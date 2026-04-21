@@ -29,6 +29,7 @@ const Profile = () => {
   useSEO({
     title: "Edit Profile | Payding",
     description: "Update your profile name and account details.",
+    path: "/profile",
   });
 
   useEffect(() => {
