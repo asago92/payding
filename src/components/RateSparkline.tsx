@@ -1,31 +1,39 @@
 interface RateSparklineProps {
   // Status drives the color tone of the line
   status: "gain" | "loss" | "stable";
+  // Real rate values, oldest first. Falsy/empty triggers a muted skeleton.
+  data?: number[];
   width?: number;
   height?: number;
   className?: string;
 }
 
 /**
- * Lightweight inline SVG sparkline for the dashboard alert card.
- * Generates a gentle deterministic trend line based on status.
- * No data fetching — purely decorative until real history is wired in.
+ * Inline SVG sparkline rendering the actual fetched rate history.
+ * Auto-scales to the min/max of the provided series; renders a flat
+ * placeholder line while data is loading or unavailable.
  */
 const RateSparkline = ({
   status,
+  data,
   width = 180,
   height = 36,
   className,
 }: RateSparklineProps) => {
-  const points = generateTrend(status);
-  const path = pointsToPath(points, width, height);
+  const hasData = Array.isArray(data) && data.length >= 2;
 
   const strokeClass =
-    status === "gain"
-      ? "text-gain"
-      : status === "loss"
-        ? "text-loss"
-        : "text-stable";
+    !hasData
+      ? "text-muted-foreground/40"
+      : status === "gain"
+        ? "text-gain"
+        : status === "loss"
+          ? "text-loss"
+          : "text-stable";
+
+  const path = hasData
+    ? seriesToPath(data!, width, height)
+    : flatPath(width, height);
 
   return (
     <svg
@@ -34,7 +42,11 @@ const RateSparkline = ({
       viewBox={`0 0 ${width} ${height}`}
       className={className}
       role="img"
-      aria-label={`${status} rate trend, last 30 days`}
+      aria-label={
+        hasData
+          ? `${status} rate trend, last ${data!.length} data points`
+          : "Loading rate trend"
+      }
     >
       <path
         d={path}
@@ -49,36 +61,27 @@ const RateSparkline = ({
   );
 };
 
-function generateTrend(status: "gain" | "loss" | "stable"): number[] {
-  // Deterministic pseudo-random walk based on a fixed seed per status.
-  const seed = status === "gain" ? 12 : status === "loss" ? 7 : 3;
-  const drift = status === "gain" ? 0.08 : status === "loss" ? -0.08 : 0;
-  const jitter = status === "stable" ? 0.05 : 0.18;
-  const out: number[] = [];
-  let v = 0.5;
-  for (let i = 0; i < 30; i++) {
-    const r = pseudo(seed + i);
-    v += drift + (r - 0.5) * jitter;
-    v = Math.max(0.05, Math.min(0.95, v));
-    out.push(v);
-  }
-  return out;
-}
+function seriesToPath(values: number[], w: number, h: number): string {
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = max - min || 1; // avoid divide-by-zero on flat series
+  const padY = 3; // leave a little vertical breathing room
+  const usableH = h - padY * 2;
+  const stepX = w / (values.length - 1);
 
-function pseudo(n: number) {
-  const x = Math.sin(n * 9301 + 49297) * 233280;
-  return x - Math.floor(x);
-}
-
-function pointsToPath(points: number[], w: number, h: number) {
-  const stepX = w / (points.length - 1);
-  return points
-    .map((p, i) => {
+  return values
+    .map((v, i) => {
       const x = i * stepX;
-      const y = h - p * h;
+      const norm = (v - min) / range; // 0..1
+      const y = h - padY - norm * usableH;
       return `${i === 0 ? "M" : "L"}${x.toFixed(2)},${y.toFixed(2)}`;
     })
     .join(" ");
+}
+
+function flatPath(w: number, h: number): string {
+  const y = (h / 2).toFixed(2);
+  return `M0,${y} L${w.toFixed(2)},${y}`;
 }
 
 export default RateSparkline;
