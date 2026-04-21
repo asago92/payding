@@ -4,7 +4,7 @@ const steps = [
   {
     step: "01",
     title: "Log the payment",
-    description: "Drop in the amount, the currency, and the date. No bank logins, no OAuth dance.",
+    description: "Drop in the amount, the currency, and the date. ",
     color: "primary" as const,
   },
   {
@@ -46,7 +46,7 @@ const HowItWorks = () => {
             {steps.map((step, index) => (
               <div key={step.step} className="flex flex-col">
                 {/* Big number + circle marker */}
-                <div className="flex items-start justify-between mb-6">
+                <div className="flex items-start justify-between mb-6 text-lg">
                   <h3
                     className={`text-6xl sm:text-7xl font-bold leading-none ${
                       step.color === "accent" ? "text-accent" : "text-primary"
@@ -92,7 +92,7 @@ const HowItWorks = () => {
                     <div className="bg-secondary/40 rounded-2xl p-5 border border-border">
                       <div className="bg-card rounded-xl p-1 mb-4 flex shadow-soft">
                         <button className="flex-1 py-2 px-3 rounded-lg bg-primary text-primary-foreground text-sm font-semibold">
-                          Only big moves
+                          Threshold
                         </button>
                         <button className="flex-1 py-2 px-3 text-sm font-medium text-muted-foreground">
                           Daily
