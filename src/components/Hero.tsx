@@ -45,16 +45,16 @@ const Hero = () => {
           {/* Product Hunt Badge */}
           <div className="flex justify-center mb-12 animate-fade-in" style={{ animationDelay: "0.4s" }}>
             <a 
-              href="https://www.producthunt.com/products/payding/launches/payding?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-payding" 
-              target="_blank" 
+              href="https://www.producthunt.com/products/payding?utm_source=badge-follow&utm_medium=badge&utm_source=badge-payding" 
+              target="_blank"
               rel="noopener noreferrer"
             >
               <img 
+                src="https://api.producthunt.com/widgets/embed-image/v1/follow.svg?product_id=1169484&theme=light&size=small" 
                 alt="Payding - Smart currency notifications for global earners | Product Hunt" 
-                width="250" 
-                height="54" 
-                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1084966&theme=light&t=1776764905961"
-                className="rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                width="86" 
+                height="32"
+                className="rounded hover:opacity-90 transition-opacity"
               />
             </a>
           </div>
