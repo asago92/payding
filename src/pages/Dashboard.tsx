@@ -18,16 +18,6 @@ import {
 import { toast } from "sonner";
 import PaymentAlertCard from "@/components/PaymentAlertCard";
 
-const WISE_AFFILIATE_LINKS: Record<string, string> = {
-  USD: "https://wise.prf.hn/l/gx2xPje/",
-  GBP: "https://wise.prf.hn/l/jXMX8y9/",
-  AUD: "https://wise.prf.hn/l/p3oLkXe/",
-  EUR: "https://wise.prf.hn/l/PlbGoRP/",
-  JPY: "https://wise.prf.hn/l/xE1kXyP/",
-};
-
-const DEFAULT_WISE_LINK = "https://wise.com/invite/dic/a48d710";
-
 interface Payment {
   id: string;
   amount: number;
@@ -44,20 +34,6 @@ interface Payment {
   last_rate_check: string | null;
   timezone?: string | null;
 }
-
-const currencies: Record<string, string> = {
-  USD: "$", EUR: "€", GBP: "£", CAD: "C$", AUD: "A$", JPY: "¥", SGD: "S$",
-  AED: "د.إ", CHF: "CHF", CNY: "¥", HKD: "HK$", NZD: "NZ$", INR: "₹",
-  NGN: "₦", KES: "KSh", GHS: "₵", ZAR: "R", PHP: "₱", BRL: "R$", MXN: "$",
-  PLN: "zł", CZK: "Kč", TRY: "₺", THB: "฿", MYR: "RM", IDR: "Rp", KRW: "₩",
-  SEK: "kr", NOK: "kr", DKK: "kr", HUF: "Ft", PKR: "₨", BDT: "৳", LKR: "Rs",
-  VND: "₫", COP: "$", PEN: "S/", CLP: "$", EGP: "E£",
-};
-
-const sources: Record<string, string> = {
-  paypal: "PayPal", wise: "Wise", upwork: "Upwork", fiverr: "Fiverr",
-  stripe: "Stripe", bank: "Bank Transfer", other: "Other",
-};
 
 const Dashboard = () => {
   const navigate = useNavigate();
