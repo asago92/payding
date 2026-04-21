@@ -50,11 +50,11 @@ const Hero = () => {
               rel="noopener noreferrer"
             >
               <img 
-                src="https://api.producthunt.com/widgets/embed-image/v1/follow.svg?product_id=1169484&theme=light&size=small" 
+                src="https://api.producthunt.com/widgets/embed-image/v1/follow.svg?product_id=1169484&theme=light" 
                 alt="Payding - Smart currency notifications for global earners | Product Hunt" 
-                width="86" 
-                height="32"
-                className="rounded hover:opacity-90 transition-opacity"
+                width="250" 
+                height="54"
+                className="rounded-lg shadow-sm hover:shadow-md transition-shadow"
               />
             </a>
           </div>
