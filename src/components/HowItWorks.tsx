@@ -64,7 +64,7 @@ const HowItWorks = () => {
                 </p>
 
                 {/* Visual mockup */}
-                <div className="mt-auto">
+                <div>
                   {index === 0 && (
                     <div className="bg-secondary/40 rounded-2xl p-5 border border-border">
                       <div className="flex items-center gap-2 mb-4 text-sm font-medium text-foreground">
