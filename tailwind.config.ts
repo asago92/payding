@@ -60,6 +60,22 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        gain: {
+          DEFAULT: "hsl(var(--gain))",
+          foreground: "hsl(var(--gain-foreground))",
+          soft: "hsl(var(--gain-soft))",
+        },
+        loss: {
+          DEFAULT: "hsl(var(--loss))",
+          foreground: "hsl(var(--loss-foreground))",
+          soft: "hsl(var(--loss-soft))",
+        },
+        stable: {
+          DEFAULT: "hsl(var(--stable))",
+          foreground: "hsl(var(--stable-foreground))",
+          soft: "hsl(var(--stable-soft))",
+        },
+        "neutral-panel": "hsl(var(--neutral-panel))",
       },
       borderRadius: {
         lg: "var(--radius)",
