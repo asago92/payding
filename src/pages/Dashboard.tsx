@@ -12,24 +12,11 @@ import {
   Bell,
   Settings,
   Loader2,
-  Check,
-  Trash2,
   Lock,
   ArrowRight,
-  TrendingUp,
-  TrendingDown,
-  Mail,
-  Smartphone,
-  ExternalLink,
-  Info,
 } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { toast } from "sonner";
+import PaymentAlertCard from "@/components/PaymentAlertCard";
 
 const WISE_AFFILIATE_LINKS: Record<string, string> = {
   USD: "https://wise.prf.hn/l/gx2xPje/",
