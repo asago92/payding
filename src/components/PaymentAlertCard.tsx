@@ -65,6 +65,49 @@ const PaymentAlertCard = ({ payment, onDelete }: PaymentAlertCardProps) => {
   const sym = (code: string) => currencySymbols[code] || code;
   const srcLabel = sourceLabels[payment.payment_source] || payment.payment_source;
 
+  // Real 30-day rate history fetched from the edge function on mount
+  const [history, setHistory] = useState<number[] | undefined>(undefined);
+
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const end = new Date();
+        const start = new Date();
+        start.setDate(end.getDate() - 30);
+        const toISO = (d: Date) => d.toISOString().slice(0, 10);
+
+        const { data, error } = await supabase.functions.invoke(
+          "fetch-exchange-rates",
+          {
+            body: {
+              action: "get_history",
+              base: payment.payment_currency,
+              target: payment.local_currency,
+              start: toISO(start),
+              end: toISO(end),
+            },
+          }
+        );
+        if (cancelled) return;
+        if (error) {
+          console.error("Failed to load rate history", error);
+          return;
+        }
+        const series = (data?.series ?? []) as { date: string; rate: number }[];
+        if (series.length >= 2) {
+          setHistory(series.map((p) => p.rate));
+        }
+      } catch (e) {
+        if (!cancelled) console.error("Rate history fetch error", e);
+      }
+    };
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [payment.payment_currency, payment.local_currency]);
+
   const hasRates =
     payment.exchange_rate_at_receipt != null && payment.last_checked_rate != null;
 
