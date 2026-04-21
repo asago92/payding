@@ -51,6 +51,18 @@
     --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(40 20% 98%) 100%);
     --shadow-soft: 0 4px 20px -4px hsl(220 20% 15% / 0.08);
     --shadow-glow: 0 0 40px -10px hsl(160 84% 39% / 0.3);
+
+    /* Rate status tokens (gain / loss / stable) */
+    --gain: 152 55% 28%;
+    --gain-foreground: 152 55% 22%;
+    --gain-soft: 145 50% 92%;
+    --loss: 4 55% 38%;
+    --loss-foreground: 4 55% 32%;
+    --loss-soft: 8 60% 95%;
+    --stable: 220 8% 40%;
+    --stable-foreground: 220 10% 30%;
+    --stable-soft: 40 15% 92%;
+    --neutral-panel: 40 20% 94%;
   }
 
   .dark {
@@ -87,6 +99,17 @@
     --gradient-card: linear-gradient(180deg, hsl(220 25% 12%) 0%, hsl(220 25% 10%) 100%);
     --shadow-soft: 0 4px 20px -4px hsl(0 0% 0% / 0.3);
     --shadow-glow: 0 0 40px -10px hsl(160 70% 50% / 0.4);
+
+    --gain: 152 60% 70%;
+    --gain-foreground: 145 55% 80%;
+    --gain-soft: 152 35% 18%;
+    --loss: 4 70% 70%;
+    --loss-foreground: 4 70% 78%;
+    --loss-soft: 4 35% 20%;
+    --stable: 220 10% 70%;
+    --stable-foreground: 220 10% 80%;
+    --stable-soft: 220 15% 20%;
+    --neutral-panel: 220 20% 18%;
   }
 }
 
