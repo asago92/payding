@@ -242,131 +242,14 @@ const Dashboard = () => {
                     <p className="text-sm">Log a payment on the home page to start tracking exchange rates.</p>
                   </div>
                 ) : (
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    {payments.map((p) => {
-                      const rateChange =
-                        p.exchange_rate_at_receipt && p.last_checked_rate
-                          ? ((p.last_checked_rate - p.exchange_rate_at_receipt) / p.exchange_rate_at_receipt) * 100
-                          : null;
-                      const localDiff =
-                        p.exchange_rate_at_receipt && p.last_checked_rate
-                          ? p.amount * p.last_checked_rate - p.amount * p.exchange_rate_at_receipt
-                          : null;
-
-                      return (
-                        <div
-                          key={p.id}
-                          className="p-5 rounded-xl bg-secondary/40 border border-border hover:border-primary/30 transition-colors"
-                        >
-                          <div className="flex items-start justify-between mb-3">
-                            <div>
-                              <span className="text-2xl font-bold">
-                                {sym(p.payment_currency)}
-                                {Number(p.amount).toLocaleString()}
-                              </span>
-                              <p className="text-sm text-muted-foreground mt-0.5">
-                                {p.payment_currency} → {p.local_currency}
-                              </p>
-                            </div>
-                            <button
-                              onClick={() => handleDeletePayment(p.id)}
-                              className="p-1.5 hover:bg-destructive/10 rounded-lg transition-colors"
-                              title="Remove alert"
-                            >
-                              <Trash2 className="w-4 h-4 text-muted-foreground hover:text-destructive" />
-                            </button>
-                          </div>
-
-                          <div className="text-sm text-muted-foreground space-y-1.5">
-                            <p>Source: {src(p.payment_source)}</p>
-                            <p>Received: {new Date(p.date_received).toLocaleDateString()}</p>
-                          </div>
-
-                          {rateChange !== null && localDiff !== null && (
-                            <div className="mt-3 p-3 bg-background/60 rounded-lg space-y-1">
-                              <div className="flex items-center gap-1.5">
-                                {rateChange >= 0 ? (
-                                  <TrendingUp className="w-4 h-4 text-primary" />
-                                ) : (
-                                  <TrendingDown className="w-4 h-4 text-destructive" />
-                                )}
-                                <span
-                                  className={`text-sm font-semibold ${
-                                    rateChange >= 0 ? "text-primary" : "text-destructive"
-                                  }`}
-                                >
-                                  {rateChange >= 0 ? "+" : ""}
-                                  {rateChange.toFixed(2)}%
-                                </span>
-                                <span className="text-xs text-muted-foreground">vs receipt</span>
-                              </div>
-                              <p
-                                 className={`text-xs font-medium ${
-                                  localDiff >= 0 ? "text-primary" : "text-destructive"
-                                }`}
-                              >
-                                {localDiff >= 0 ? "+" : ""}
-                                {sym(p.local_currency)}
-                                {Math.abs(localDiff).toLocaleString(undefined, {
-                                  minimumFractionDigits: 2,
-                                  maximumFractionDigits: 2,
-                                })}{" "}
-                                {p.local_currency} today
-                              </p>
-                            </div>
-                          )}
-
-                          <div className="mt-3 flex items-center justify-between">
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                              {p.notification_method === "email" ? (
-                                <Mail className="w-3 h-3" />
-                              ) : (
-                                <Smartphone className="w-3 h-3" />
-                              )}
-                              {p.notification_type === "daily"
-                                ? "Daily alerts"
-                                : `Alert at +${p.threshold}%`}
-                              <span className="ml-auto">
-                                <span className="inline-flex items-center gap-1 text-primary">
-                                  <Check className="w-3 h-3" />
-                                  Active
-                                </span>
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className="mt-3 flex items-center gap-1.5">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="text-xs h-8 gap-1.5"
-                              onClick={() =>
-                                window.open(
-                                  WISE_AFFILIATE_LINKS[p.payment_currency] || DEFAULT_WISE_LINK,
-                                  "_blank",
-                                  "noopener,noreferrer"
-                                )
-                              }
-                            >
-                              Cash out via Wise
-                              <ExternalLink className="w-3 h-3" />
-                            </Button>
-                            <TooltipProvider delayDuration={200}>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <span className="cursor-help text-muted-foreground hover:text-foreground transition-colors">
-                                    <Info className="w-3.5 h-3.5" />
-                                  </span>
-                                </TooltipTrigger>
-                                <TooltipContent side="top" className="max-w-[240px] text-xs leading-relaxed">
-                                  This is an affiliate link. If you use Wise through us, we may earn a small commission which helps keep this tool free for you! 🙏
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          </div>
-                        </div>
-                      );
-                    })}
+                  <div className="grid gap-4">
+                    {payments.map((p) => (
+                      <PaymentAlertCard
+                        key={p.id}
+                        payment={p}
+                        onDelete={handleDeletePayment}
+                      />
+                    ))}
                   </div>
                 )}
               </div>
