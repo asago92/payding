@@ -251,7 +251,7 @@ const PaymentAlertCard = ({ payment, onDelete }: PaymentAlertCardProps) => {
         <span className="text-xs sm:text-sm text-muted-foreground">
           Rate trend · last 30 days
         </span>
-        <RateSparkline status={status} className="shrink-0" />
+        <RateSparkline status={status} data={history} className="shrink-0" />
       </div>
 
       {/* Wise CTA */}
