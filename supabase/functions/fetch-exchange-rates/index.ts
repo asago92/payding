@@ -72,21 +72,14 @@ Deno.serve(async (req) => {
       // Returns daily ECB rates between `start` and `end` (inclusive).
       // Frankfurter only publishes business-day rates; weekends/holidays are simply omitted.
       // Body: { action: 'get_history', base, target, start: 'YYYY-MM-DD', end?: 'YYYY-MM-DD' }
-      const body = await Promise.resolve({ base, target, date }) // already destructured above
-      const startDate: string | undefined = (body as any).start ?? undefined
-      // Re-parse from request to get start/end since they weren't destructured initially
-      // (we already consumed req.json() — fall back to `date` as start for backward compat)
-      const reqUrl = new URL(req.url)
-      // Pull from the original parsed payload by re-reading via a header-stashed copy is not possible;
-      // instead, callers should send `date` as the start date. We'll look back 30 days from end if no start.
-      const endStr = new Date().toISOString().slice(0, 10)
-      const start = startDate || (() => {
+      const endStr: string = end || new Date().toISOString().slice(0, 10)
+      const startStr: string = start || (() => {
         const d = new Date()
         d.setDate(d.getDate() - 30)
         return d.toISOString().slice(0, 10)
       })()
 
-      const endpoint = `${FRANKFURTER_API}/${start}..${endStr}?from=${base}&to=${target}`
+      const endpoint = `${FRANKFURTER_API}/${startStr}..${endStr}?from=${base}&to=${target}`
       console.log(`Fetching history from: ${endpoint}`)
 
       const response = await fetch(endpoint)
@@ -96,14 +89,25 @@ Deno.serve(async (req) => {
         throw new Error(`Exchange rate history error: ${response.status}`)
       }
 
-      const data = await response.json() as { base: string; start_date: string; end_date: string; rates: Record<string, Record<string, number>> }
+      const data = await response.json() as {
+        base: string
+        start_date: string
+        end_date: string
+        rates: Record<string, Record<string, number>>
+      }
       const series = Object.entries(data.rates)
         .map(([d, r]) => ({ date: d, rate: r[target] }))
         .filter((p) => typeof p.rate === 'number')
         .sort((a, b) => a.date.localeCompare(b.date))
 
       return new Response(
-        JSON.stringify({ base: data.base, target, start: data.start_date, end: data.end_date, series }),
+        JSON.stringify({
+          base: data.base,
+          target,
+          start: data.start_date,
+          end: data.end_date,
+          series,
+        }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
