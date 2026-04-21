@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { action, base, target, date, email } = await req.json()
+    const { action, base, target, date, email, start, end } = await req.json()
     
     console.log(`Exchange rate request: action=${action}, base=${base}, target=${target}, date=${date}`)
 
@@ -63,6 +63,50 @@ Deno.serve(async (req) => {
           base: data.base,
           target,
           date: data.date,
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    if (action === 'get_history') {
+      // Returns daily ECB rates between `start` and `end` (inclusive).
+      // Frankfurter only publishes business-day rates; weekends/holidays are simply omitted.
+      // Body: { action: 'get_history', base, target, start: 'YYYY-MM-DD', end?: 'YYYY-MM-DD' }
+      const endStr: string = end || new Date().toISOString().slice(0, 10)
+      const startStr: string = start || (() => {
+        const d = new Date()
+        d.setDate(d.getDate() - 30)
+        return d.toISOString().slice(0, 10)
+      })()
+
+      const endpoint = `${FRANKFURTER_API}/${startStr}..${endStr}?from=${base}&to=${target}`
+      console.log(`Fetching history from: ${endpoint}`)
+
+      const response = await fetch(endpoint)
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error(`Frankfurter history error: ${response.status} - ${errorText}`)
+        throw new Error(`Exchange rate history error: ${response.status}`)
+      }
+
+      const data = await response.json() as {
+        base: string
+        start_date: string
+        end_date: string
+        rates: Record<string, Record<string, number>>
+      }
+      const series = Object.entries(data.rates)
+        .map(([d, r]) => ({ date: d, rate: r[target] }))
+        .filter((p) => typeof p.rate === 'number')
+        .sort((a, b) => a.date.localeCompare(b.date))
+
+      return new Response(
+        JSON.stringify({
+          base: data.base,
+          target,
+          start: data.start_date,
+          end: data.end_date,
+          series,
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
