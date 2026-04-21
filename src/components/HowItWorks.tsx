@@ -54,11 +54,6 @@ const HowItWorks = () => {
                   >
                     {step.step}
                   </h3>
-                  <div
-                    className={`hidden md:block w-6 h-6 rounded-full border-2 mt-2 ${
-                      step.color === "accent" ? "border-accent" : "border-primary"
-                    }`}
-                  />
                 </div>
 
                 <h4 className="text-2xl font-bold mb-3 text-foreground">
