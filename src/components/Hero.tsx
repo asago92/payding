@@ -35,11 +35,28 @@ const Hero = () => {
           </p>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 animate-slide-up" style={{ animationDelay: "0.3s" }}>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8 animate-slide-up" style={{ animationDelay: "0.3s" }}>
             <Button variant="hero" size="xl" onClick={() => document.getElementById("log-payment")?.scrollIntoView({ behavior: "smooth" })}>
               <TrendingUp className="w-5 h-5" />
               Get Started
             </Button>
+          </div>
+
+          {/* Product Hunt Badge */}
+          <div className="flex justify-center mb-12 animate-fade-in" style={{ animationDelay: "0.4s" }}>
+            <a 
+              href="https://www.producthunt.com/products/payding/launches/payding?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-payding" 
+              target="_blank" 
+              rel="noopener noreferrer"
+            >
+              <img 
+                alt="Payding - Smart currency notifications for global earners | Product Hunt" 
+                width="250" 
+                height="54" 
+                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1084966&theme=light&t=1776764905961"
+                className="rounded-lg shadow-sm hover:shadow-md transition-shadow"
+              />
+            </a>
           </div>
 
           {/* Trust indicators */}
