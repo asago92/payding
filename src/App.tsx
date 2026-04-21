@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
+import Profile from "./pages/Profile";
 import ResetPassword from "./pages/ResetPassword";
 import About from "./pages/About";
 import Blog from "./pages/Blog";
@@ -25,6 +26,7 @@ const AppContent = () => {
       <Route path="/" element={<Index />} />
       <Route path="/auth" element={<Auth />} />
       <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/profile" element={<Profile />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/about" element={<About />} />
       <Route path="/blog" element={<Blog />} />

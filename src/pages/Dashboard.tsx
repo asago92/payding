@@ -194,13 +194,23 @@ const Dashboard = () => {
       <Header />
       <main className="flex-1 pt-24 pb-16">
         <div className="container px-4 max-w-4xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold">
-              {profileName ? `Hello, ${profileName}` : "Dashboard"}
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              Manage your payment alerts and account settings
-            </p>
+          <div className="mb-8 flex items-start justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold">
+                {profileName ? `Hello, ${profileName}` : "Dashboard"}
+              </h1>
+              <p className="text-muted-foreground mt-1">
+                Manage your payment alerts and account settings
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate("/profile")}
+              className="shrink-0"
+            >
+              Edit profile
+            </Button>
           </div>
 
           <Tabs defaultValue="alerts" className="space-y-6">
