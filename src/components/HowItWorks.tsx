@@ -46,7 +46,7 @@ const HowItWorks = () => {
             {steps.map((step, index) => (
               <div key={step.step} className="flex flex-col">
                 {/* Big number + circle marker */}
-                <div className="flex items-start justify-between mb-6 text-lg">
+                <div className="flex items-start justify-between mb-8 text-lg">
                   <h3
                     className={`text-6xl sm:text-7xl font-bold leading-none ${
                       step.color === "accent" ? "text-accent" : "text-primary"
@@ -59,7 +59,7 @@ const HowItWorks = () => {
                 <h4 className="text-2xl font-bold mb-3 text-foreground">
                   {step.title}
                 </h4>
-                <p className="text-muted-foreground leading-relaxed mb-6">
+                <p className="text-muted-foreground leading-relaxed mb-8 min-h-[3.5rem]">
                   {step.description}
                 </p>
 
