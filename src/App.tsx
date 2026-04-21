@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
+import Profile from "./pages/Profile";
 import ResetPassword from "./pages/ResetPassword";
 import About from "./pages/About";
 import Blog from "./pages/Blog";
