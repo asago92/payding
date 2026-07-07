@@ -146,9 +146,6 @@ const PaymentAlertCard = ({ payment, onDelete }: PaymentAlertCardProps) => {
         ? "text-loss"
         : "text-stable";
 
-  const wiseLink =
-    WISE_AFFILIATE_LINKS[payment.payment_currency] || DEFAULT_WISE_LINK;
-
   return (
     <div className="bg-card rounded-2xl border border-border shadow-soft p-5 sm:p-6">
       {/* Header */}
