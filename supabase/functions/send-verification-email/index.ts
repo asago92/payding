@@ -109,37 +109,8 @@ Deno.serve(async (req) => {
 
     const body = await req.json()
 
-    // Test mode: send test email with a dummy link
-    if (body.action === 'send_test') {
-      const testEmail = body.email
-      if (!testEmail) throw new Error('No email provided for test')
+    // send_test path removed: unauthenticated test-email endpoint enabled abuse.
 
-      const dummyUrl = 'https://www.payding.xyz/?confirmed=true'
-      const resendResponse = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${RESEND_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: 'Payding <welcome@contact.payding.xyz>',
-          to: [testEmail],
-          subject: 'Verify your email — Payding ✉️',
-          html: buildVerificationHtml(dummyUrl),
-        }),
-      })
-
-      if (!resendResponse.ok) {
-        const errText = await resendResponse.text()
-        throw new Error(`Resend error: ${errText}`)
-      }
-
-      const resendData = await resendResponse.json()
-      return new Response(
-        JSON.stringify({ success: true, id: resendData.id, sent_to: testEmail }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
 
     // Normal mode: create user and send branded verification email
     const { email, password, name } = body
