@@ -49,7 +49,7 @@ const Blog = () => {
                         {post.excerpt}
                       </p>
                       <span className="inline-flex items-center gap-1.5 text-sm font-medium text-primary">
-                        Read more
+                        Read full article: {post.title}
                         <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                       </span>
                     </article>

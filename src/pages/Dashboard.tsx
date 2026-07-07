@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import PaymentAlertCard from "@/components/PaymentAlertCard";
+import useSeo from "@/hooks/use-seo";
 
 interface Payment {
   id: string;
@@ -38,6 +39,11 @@ interface Payment {
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user, isReady: authReady } = useAuthReady();
+  useSeo({
+    title: "Dashboard",
+    description: "Manage your payments and currency alert thresholds in your Payding dashboard.",
+    path: "/dashboard",
+  });
   const [payments, setPayments] = useState<Payment[]>([]);
   const [fetchingPayments, setFetchingPayments] = useState(true);
 

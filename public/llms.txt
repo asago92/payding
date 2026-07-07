@@ -1,0 +1,16 @@
+# Payding
+
+> Smart currency exchange rate alerts for global earners. Get notified when your local payout is higher than the day you were paid.
+
+Payding is an information-only tool for freelancers and remote workers paid in foreign currency. Users log payments manually; Payding tracks mid-market exchange rates (Frankfurter API) and emails alerts when it's a good time to convert. We do not hold funds, connect to banks, or execute transfers.
+
+## Pages
+
+- [Home](/): Product overview, how it works, and payment logging.
+- [About](/about): Why Payding exists and who it's for.
+- [Blog](/blog): Guides on timing foreign payouts and currency strategy.
+
+## Optional
+
+- [Terms & Conditions](/terms): Legal terms of use.
+- [Privacy Policy](/privacy): How user data is handled.
