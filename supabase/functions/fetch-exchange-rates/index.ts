@@ -113,6 +113,16 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'check_all_payments') {
+      // Restrict to authorized cron caller only. Requires a shared secret header.
+      const cronSecret = Deno.env.get('CRON_SECRET')
+      const providedSecret = req.headers.get('x-cron-secret')
+      if (!cronSecret || providedSecret !== cronSecret) {
+        console.warn('Unauthorized check_all_payments attempt')
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
       // This action is for scheduled checks - fetch all active payments and compare rates
       // The cron job runs hourly; we check each payment's timezone to see if it's ~8 AM there
       const supabaseUrl = Deno.env.get('SUPABASE_URL')!
