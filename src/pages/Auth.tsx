@@ -7,10 +7,17 @@ import { DollarSign, Loader2, Mail, Lock, ArrowLeft, ArrowRight, AlertTriangle, 
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import useSeo from "@/hooks/use-seo";
 
 const Auth = () => {
   const [searchParams] = useSearchParams();
-  const [isLogin, setIsLogin] = useState(!searchParams.get("signup"));
+  const isSignup = !!searchParams.get("signup");
+  const [isLogin, setIsLogin] = useState(!isSignup);
+  useSeo({
+    title: isSignup ? "Sign Up" : "Sign In",
+    description: "Access your Payding account to manage currency alerts and payment tracking.",
+    path: "/auth",
+  });
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
