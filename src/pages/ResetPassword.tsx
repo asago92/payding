@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { DollarSign, Loader2, Lock, ArrowLeft, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import useSeo from "@/hooks/use-seo";
 
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
@@ -14,6 +15,11 @@ const ResetPassword = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const navigate = useNavigate();
+  useSeo({
+    title: "Reset Password",
+    description: "Set a new password for your Payding account.",
+    path: "/reset-password",
+  });
 
   useEffect(() => {
     // Check if we have a valid recovery session

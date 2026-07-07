@@ -1,9 +1,15 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import useSeo from "@/hooks/use-seo";
 
 const Unsubscribe = () => {
   const [searchParams] = useSearchParams();
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
+  useSeo({
+    title: "Unsubscribe",
+    description: "Manage your Payding email alert subscriptions.",
+    path: "/unsubscribe",
+  });
 
   useEffect(() => {
     const paymentId = searchParams.get("id");
