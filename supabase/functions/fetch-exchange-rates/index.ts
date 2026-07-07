@@ -429,7 +429,6 @@ Deno.serve(async (req) => {
 
     // send_test_alert removed: unauthenticated test-email path enabled abuse.
 
-    // send_test_alert removed: unauthenticated test-email path enabled abuse.
 
     return new Response(
       JSON.stringify({ error: 'Invalid action' }),
