@@ -3,30 +3,12 @@ import {
   ArrowRight,
   ChevronDown,
   ChevronUp,
-  ExternalLink,
-  Info,
   Trash2,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import RateSparkline from "@/components/RateSparkline";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
-const WISE_AFFILIATE_LINKS: Record<string, string> = {
-  USD: "https://wise.prf.hn/l/gx2xPje/",
-  GBP: "https://wise.prf.hn/l/jXMX8y9/",
-  AUD: "https://wise.prf.hn/l/p3oLkXe/",
-  EUR: "https://wise.prf.hn/l/PlbGoRP/",
-  JPY: "https://wise.prf.hn/l/xE1kXyP/",
-};
-
-const DEFAULT_WISE_LINK = "https://wise.com/invite/dic/a48d710";
 
 const currencySymbols: Record<string, string> = {
   USD: "$", EUR: "€", GBP: "£", CAD: "C$", AUD: "A$", JPY: "¥", SGD: "S$",
@@ -252,31 +234,6 @@ const PaymentAlertCard = ({ payment, onDelete }: PaymentAlertCardProps) => {
           Rate trend · last 30 days
         </span>
         <RateSparkline status={status} data={history} className="shrink-0" />
-      </div>
-
-      {/* Wise CTA */}
-      <div className="mt-4 flex items-center gap-1.5">
-        <Button
-          variant="outline"
-          size="sm"
-          className="text-xs h-8 gap-1.5"
-          onClick={() => window.open(wiseLink, "_blank", "noopener,noreferrer")}
-        >
-          Cash out via Wise
-          <ExternalLink className="w-3 h-3" />
-        </Button>
-        <TooltipProvider delayDuration={200}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="cursor-help text-muted-foreground hover:text-foreground transition-colors">
-                <Info className="w-3.5 h-3.5" />
-              </span>
-            </TooltipTrigger>
-            <TooltipContent side="top" className="max-w-[240px] text-xs leading-relaxed">
-              This is an affiliate link. If you use Wise through us, we may earn a small commission which helps keep this tool free for you! 🙏
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
       </div>
     </div>
   );
