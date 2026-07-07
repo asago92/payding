@@ -419,14 +419,15 @@ Deno.serve(async (req) => {
       }
 
       return new Response(
-        JSON.stringify({ 
-          success: true, 
+        JSON.stringify({
+          success: true,
           checked: results.length,
-          results 
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
+
+    // send_test_alert removed: unauthenticated test-email path enabled abuse.
 
     // send_test_alert removed: unauthenticated test-email path enabled abuse.
 
